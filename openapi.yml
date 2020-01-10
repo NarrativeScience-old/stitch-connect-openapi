@@ -1,0 +1,302 @@
+openapi: "3.0.2"
+
+info:
+  title: Stitch Connect
+  description: https://www.stitchdata.com/docs/developers/stitch-connect/api
+  version: "0.1"
+
+servers:
+  - url: https://api.stitchdata.com
+    description: Stitch Connect
+
+paths:
+  /v4/destination-types:
+    get:
+      operationId: api.get_destination_types
+      responses:
+        "200":
+          $ref: "#/components/responses/destination-report-cards"
+
+components:
+  # parameters:
+  #   app_id:
+  #     name: app_id
+  #     in: path
+  #     description: app id
+  #     required: true
+  #     schema:
+  #       type: string
+
+  #   insight_id:
+  #     name: insight_id
+  #     in: path
+  #     description: Id for a specific insight
+  #     required: true
+  #     schema:
+  #       type: string
+
+  #   insight_type:
+  #     name: insight_type
+  #     in: query
+  #     description: Type of insight to get
+  #     required: false
+  #     style: form
+  #     schema:
+  #       $ref: "#/components/schemas/insight_type"
+
+  #   timeframe:
+  #     name: timeframe
+  #     in: query
+  #     description: Timeframe to query for the insight
+  #     required: false
+  #     style: form
+  #     schema:
+  #       $ref: "#/components/schemas/timeframe"
+
+  #   limit:
+  #     name: limit
+  #     in: query
+  #     description: Limit the number of items returned
+  #     required: false
+  #     style: form
+  #     schema:
+  #       $ref: "#/components/schemas/limit"
+
+  #   offset:
+  #     name: offset
+  #     in: query
+  #     description: Offset the slice of items returned
+  #     required: false
+  #     style: form
+  #     schema:
+  #       $ref: "#/components/schemas/offset"
+
+  schemas:
+    source-report-card:
+      description: >
+        A Source Report Card object contains information about a source’s connection
+        configuration.
+      type: object
+      properties:
+        current_step:
+          description: >
+            The index (in the steps array) of the current step needed to configure the
+            data source.
+          type: integer
+        details:
+          $ref: "#/components/schemas/connection-details"
+        steps:
+          description: >
+            A sequential list of Connection Step objects required to complete configuration for the connection type.
+          type: array
+          items:
+            $ref: "#/components/schemas/connection-step"
+        type:
+          description: >
+            The connection type. Ex: platform.mysql or platform.hubspot
+          type: string
+
+    destination-report-card:
+      description: >
+        A Destination Report Card object contains information about a destination’s
+        connection configuration.
+      type: object
+      properties:
+        current_step:
+          description: >
+            The index (in the steps array) of the current step needed to configure the
+            data source.
+          type: integer
+        details:
+          $ref: "#/components/schemas/connection-details"
+        steps:
+          description: >
+            A sequential list of Connection Step objects required to complete configuration for the connection type.
+          type: array
+          items:
+            $ref: "#/components/schemas/connection-step"
+        type:
+          description: >
+            The destination connection type. For example: postgres or redshift
+          type: string
+
+    connection-step:
+      description: >
+        Contained in a Source or Destination Report Card object, the Connection Steps object contains the steps necessary to configure a data source or destination.
+      type: object
+      properties:
+        type:
+          description: The type of step
+          type: string
+          enum:
+            - form
+            - oauth
+            - profile
+            - discover_schema
+            - field_selection
+            - fully_configured
+        properties:
+          description: >
+            The destination connection type. For example: postgres or redshift
+          type: array
+          items:
+            $ref: "#/components/schemas/connection-step-props"
+
+    connection-details:
+      description: >
+        Contained in a Source or Destination Report Card object, the Details object
+        contains information about a connection type’s availability within Stitch.
+      type: object
+      properties:
+        access:
+          description: >
+            Indicates whether the Stitch client who made the request has access to the connection.
+
+            This value is based on the connection’s pricing_tier and pipeline_state. If the Stitch client is using a plan that doesn’t meet the pricing_tier requirement, the access value will be false. For example: If pricing_tier: enterprise,the Stitch client must be on an Enterprise plan to access the source.
+
+            All connections with a pipeline_state value of deprecated will also have an access value of false.
+          type: boolean
+        default_scheduling_interval:
+          description: >
+            Applicable only to source report cards. The default frequency_in_minutes
+            value for the source.
+          type: integer
+        pricing_tier:
+          description: >
+            Indicates the type of Stitch plan required to use the connection. Possible values are:
+
+            standard - Any Stitch plan can use the connection.
+            premium - A Standard Stitch plan is required to use the connection.
+            enterprise - An Enterprise Stitch plan is required to use the connection.
+          type: string
+          enum:
+            - standard
+            - premium
+            - enterprise
+        default_start_date:
+          description: >
+            Applicable only to source report cards. The default start_date value for
+            the source.
+          type: string
+        pipeline_state:
+          description: >
+            The connection type’s release status in Stitch. Possible values are:
+
+            alpha - The connection is in development and is not available in Stitch.
+            beta - The connection is in open or closed beta and is available in Stitch.
+            released - The connection is in general release and available in Stitch.
+            deprecated - The connection has been deprecated and is no longer available in Stitch.
+          type: string
+          enum:
+            - alpha
+            - beta
+            - released
+            - deprecated
+        protocol:
+          description: >
+            The type of the connection. For example: snowflake or platform.facebook
+          type: string
+
+    connection-step-props:
+      description: >
+        A Properties object contains the properties necessary to complete a connection
+        step. Returned within a Source or Destination object, these properties provide
+        information about the configuration status of the connection.
+      type: object
+      properties:
+        name:
+          description: The name of the property.
+          type: string
+        is_required:
+          description: If true, the property is required for complete configuration.
+          type: boolean
+        is_credential:
+          description: >
+            If true, the property is a credential or otherwise sensitive data.
+          type: boolean
+        property_type:
+          description: >
+            Indicates the type of the property. Possible values are:
+
+            user_provided - Indicates the property must be set by the user.
+            read_only - Indicates the property is read-only and is not settable by the
+            API. Generally, this is an internal field set inside of Stitch.
+            system_provided_by_default - Indicates the property used to be
+            system_provided: true, but can now be set by the API consumer. These are
+            generally properties associated with OAuth for generating refresh and
+            access tokens.
+
+            Note: Use caution when setting these properties, as using incorrect values
+            can put the source into a non-functioning state.
+          type: string
+          enum:
+            - user_provided
+            - read_only
+            - system_provided_by_default
+        json_schema:
+          description: >
+            Note: Data will only be returned for this array if property_type:
+            user_provided or property_type: system_provided_by_default. If
+            property_type: read_only, this property will be null.
+
+            An array containing:
+
+            type - A string indicating the expected data type of the property’s value.
+            For example: boolean
+            pattern - A string indicating the expected pattern of the property’s value.
+            For example: ^\\d+$
+            anyOf - A series of arrays containing key-value pairs for the type and
+            format combinations Stitch will accept as the property’s value
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                description: >
+                  A string indicating the expected data type of the property’s value.
+                  For example: boolean
+                type: string
+              pattern:
+                description: >
+                  A string indicating the expected pattern of the property’s value. For
+                  example: ^\\d+$
+                type: string
+              anyOf:
+                description: >
+                  A series of arrays containing key-value pairs for the type and format
+                  combinations Stitch will accept as the property’s value. F
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    format:
+                      type: string
+        provided:
+          description: >
+            If true, the property has been provided. For properties where
+            property_type: user_provided, this indicates that the user has provided the
+            property.
+          type: boolean
+
+  # requestBodies:
+  #   insight:
+  #     description: An insight
+  #     content:
+  #       application/json:
+  #         schema:
+  #           oneOf:
+  #             - $ref: "#/components/schemas/pipeline_movement"
+  #           discriminator:
+  #             propertyName: type
+
+  responses:
+    destination-report-cards:
+      description: List of destination report card objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/destination-report-card"
