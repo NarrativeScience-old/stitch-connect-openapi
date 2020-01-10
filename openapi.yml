@@ -9,68 +9,28 @@ servers:
   - url: https://api.stitchdata.com
     description: Stitch Connect
 
+securitySchemes:
+  bearerAuth:
+    description: Access token
+    type: http
+    scheme: bearer
+
 paths:
   /v4/destination-types:
     get:
+      summary: >
+        Retrieves general information about the configuration required for all
+        supported destination types.
+      tags:
+        - Destination Types
       operationId: api.get_destination_types
+      security:
+        - bearerAuth: []
       responses:
         "200":
           $ref: "#/components/responses/destination-report-cards"
 
 components:
-  # parameters:
-  #   app_id:
-  #     name: app_id
-  #     in: path
-  #     description: app id
-  #     required: true
-  #     schema:
-  #       type: string
-
-  #   insight_id:
-  #     name: insight_id
-  #     in: path
-  #     description: Id for a specific insight
-  #     required: true
-  #     schema:
-  #       type: string
-
-  #   insight_type:
-  #     name: insight_type
-  #     in: query
-  #     description: Type of insight to get
-  #     required: false
-  #     style: form
-  #     schema:
-  #       $ref: "#/components/schemas/insight_type"
-
-  #   timeframe:
-  #     name: timeframe
-  #     in: query
-  #     description: Timeframe to query for the insight
-  #     required: false
-  #     style: form
-  #     schema:
-  #       $ref: "#/components/schemas/timeframe"
-
-  #   limit:
-  #     name: limit
-  #     in: query
-  #     description: Limit the number of items returned
-  #     required: false
-  #     style: form
-  #     schema:
-  #       $ref: "#/components/schemas/limit"
-
-  #   offset:
-  #     name: offset
-  #     in: query
-  #     description: Offset the slice of items returned
-  #     required: false
-  #     style: form
-  #     schema:
-  #       $ref: "#/components/schemas/offset"
-
   schemas:
     source-report-card:
       description: >
@@ -280,16 +240,52 @@ components:
             property.
           type: boolean
 
-  # requestBodies:
-  #   insight:
-  #     description: An insight
-  #     content:
-  #       application/json:
-  #         schema:
-  #           oneOf:
-  #             - $ref: "#/components/schemas/pipeline_movement"
-  #           discriminator:
-  #             propertyName: type
+    hook-notification:
+      description: >
+        A Hook Notification object contains information about a webhook configured in
+        the account’s Post-load hook list.
+      type: object
+      properties:
+        id:
+          description: The notification ID.
+          type: integer
+        client_id:
+          description: The ID of the Stitch client account.
+          type: integer
+        created_at:
+          description: The time at which the notification was created.
+          type: string
+          format: date-time
+        modified_at:
+          description: The time at which the notification was last modified.
+          type: string
+          format: date-time
+        disabled_at:
+          description: >
+            The time at which the notification was disabled. This will be null unless
+            the notification has been disabled.
+          type: string
+          format: date-time
+        type:
+          description: >
+            The type of the notification. Possible values are: post_load
+          type: string
+          enum:
+            - post_load
+        version:
+          description: The version of the hook service the notification is using.
+          type: integer
+        config:
+          description: The configuration for the hook.
+          type: object
+          properties:
+            url:
+              description: >
+                Applicable to hook notifications only. The webhook URL that Stitch
+                should deliver hook notifications to.
+              type: string
+
+  requestBodies: {}
 
   responses:
     destination-report-cards:
