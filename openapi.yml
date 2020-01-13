@@ -9,11 +9,6 @@ servers:
   - url: https://api.stitchdata.com
     description: Stitch Connect
 
-securitySchemes:
-  bearerAuth:
-    description: Access token
-    type: http
-    scheme: bearer
 
 paths:
   /v4/destination-types:
@@ -30,8 +25,175 @@ paths:
         "200":
           $ref: "#/components/responses/destination-report-cards"
 
+  /v4/destinations:
+    get:
+      summary: >
+        Lists the destination currently in use for a Stitch account. Only a single
+        data warehouse is supported per Stitch client account.
+      tags:
+        - destinations
+      operationId: api.get_destinations
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully fetched destinations connected to the Stitch account
+          $ref: "#/components/responses/destinations"
+
+    post:
+      summary: >
+        Creates a new destination. Only a single destination is supported
+        per Stitch client account.
+      tags:
+        - destinations
+      operationId: api.create_destination
+      requestBody:
+        description: Object containing type and properties of a destination
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/destination-info"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Destination successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/destination"
+        "400":
+          description: >
+            Missing or prohibited arguments
+        "400":
+          description: >
+            Only a single destination per account is allowed
+
+  /v4/destinations/{destination_id}:
+    put:
+      summary: >
+        Updates an existing destination. Modifications to the type attribute
+        are not supported.
+      tags:
+        - destinations
+      operationId: api.update_destination
+      parameters:
+      - $ref: "#/components/parameters/destination_id"
+      requestBody:
+        description: Object containing properties info
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/destination-form-properties"
+      responses:
+        "200":
+          description: >
+            Destination successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/destination"
+        "400":
+          description: >
+            Modifications to `type` are unsupported
+        "400":
+          description: >
+            Invalid destination ID
+
+    delete:
+      summary: >
+        Deletes an existing destination. Note: Stitch requires a destination to
+        replicate data. Replication will be paused until a new destination is
+        created and has a successful connection.
+      tags:
+      - destinations
+      operationId: api.delete_destination
+      parameters:
+      - $ref: "#/components/parameters/destination_id"
+      responses:
+        "200":
+          description: >
+            Destination successfully deleted
+        "400":
+          description: >
+            Invalid destination ID
+        "502":
+          description: >
+            Destination ID not provided
+        "502":
+          description: >
+            Destination ID contains illegal characters
+      security:
+      - bearerAuth: []
+
+  /v4/sources:
+    get:
+      summary: >
+        Lists the sources for an account, including active, paused, and deleted sources.
+      tags:
+      - sources
+      operationId: api.get_sources
+      responses:
+        "200":
+          description: >
+            Account sources sucessfully fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/sources"
+      security:
+      - bearerAuth: []
+
+
 components:
   schemas:
+    destination:
+      description: >
+        An object representing a destination. Destinations are the data warehouses
+        into which Stitch writes data.
+      type: object
+      properties:
+        created_at:
+          description: >
+            The time at which the destination object was created.
+          type: string
+        deleted_at:
+          description: >
+            The time at which the destination object was deleted.
+          type: string
+        id:
+          description: A unique identifier for this destination.
+          type: string
+        name:
+          description: The name for the destination.
+          type: string
+        paused_at:
+          description: >
+            If the connection was paused by the user, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+        properties:
+          $ref: "#/components/schemas/destination-form-properties"
+        report_card:
+          $ref: "#/components/schemas/destination-report-card"
+        stitch_client_id:
+          description: >
+            The ID of the Stitch client account.
+          type: integer
+        system_paused_at:
+          description: >
+            If the connection was paused by the system, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+          type: string
+        type:
+          description: >
+            The destination type. Must be one of: azure_sqldw, postgres,
+            redshift, s3, or snowflake.
+          type: string
+        updated_at:
+          description: >
+            The time at which the destination object was last updated.
+          type: string
+
     source-report-card:
       description: >
         A Source Report Card object contains information about a source’s connection
@@ -285,9 +447,127 @@ components:
                 should deliver hook notifications to.
               type: string
 
-  requestBodies: {}
+    destination-info:
+      description: >
+        Object containing information about the destination type and the
+        properties associated with that type
+      type: object
+      properties:
+        type:
+          type: string
+          description: >
+            The destination type. Must be one of: azure_sqldw, postgres,
+            redshift, s3, or snowflake.
+        properties:
+          $ref: "#/components/schemas/destination-form-properties"
+
+    destination-form-properties:
+      description: >
+        Parameters for connecting to the destination, excluding any sensitive
+        credentials. The parameters must adhere to the type of destination.
+      type: object
+      properties:
+        csv_delimiter:
+          description: csv delimiter character
+          type: string
+        output_file_format:
+          description: >
+            Defines the type of file Stitch will write to the bucket.
+            Possible values are:
+
+            - csv, which will use CSV (.csv) files
+            - jsonl, which will use JSON (.jsonl) files
+          type: string
+
+    source:
+      description: >
+        An object representing a data source. Sources are the databases, APIs, and
+        other data applications that Stitch replicates data from. Sources can be
+        retrieved in a list or individually by ID.
+      type: object
+      properties:
+        id:
+          description: The unique identifier for this source.
+          type: integer
+        created_at:
+          description: The time at which the source object was created.
+          type: string
+        deleted_at:
+          description: The time at which the source object was deleted.
+          type: string
+        display_name:
+          description: The display name of the source connection.
+          type: string
+        name:
+          description: >
+            The name of the source connection, dynamically generated from
+            `display_name`. The `name` corresponds to the destination schema name that
+            the data from this source will be loaded into.
+
+            Names must:
+
+            - Contain only lowercase alphanumerics and underscores
+            - Be unique within each Stitch client account
+          type: string
+        paused_at:
+          description: >
+            If the connection was paused by the user, the time the pause began.
+            Otherwise, or if the connection is active, this will be `null`.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+        report_card:
+          $ref: "#/components/schemas/source-report-card"
+        stitch_client_id:
+          description: The ID of the Stitch client account.
+          type: integer
+        system_paused_at:
+          description: >
+            If the connection was paused by the system, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+          type:
+            string
+        type:
+          description: The source type.
+          type: string
+        updated_at:
+          description: The time at which the object was last updated.
+          type: string
+
+    source-form-properties:
+      description: >
+        Parameters for connecting to the source, excluding any sensitive credentials.
+        The parameters must adhere to the type of source.
+      type: object
+      properties:
+        api_type:
+          description: >
+            The Salesforce API Stitch should use to extract data.
+            Possible values are REST or BULK.
+          type: string
+
+  parameters:
+    destination_id:
+      name: destination_id
+      in: path
+      description: The ID of the destination to be updated or deleted
+      required: true
+      schema:
+        type: string
 
   responses:
+    destination:
+      $ref: "#/components/schemas/destination"
+
+    destinations:
+      description: List of destination objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/destination"
+
     destination-report-cards:
       description: List of destination report card objects
       content:
@@ -296,3 +576,18 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/destination-report-card"
+
+    sources:
+      description: List of source objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/source"
+
+  securitySchemes:
+    bearerAuth:
+      description: Access token
+      type: http
+      scheme: bearer
