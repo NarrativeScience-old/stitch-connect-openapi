@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **api_get_sources**
-> Sources api_get_sources()
+> list[Source] api_get_sources()
 
 Lists the sources for an account, including active, paused, and deleted sources. 
 
@@ -43,7 +43,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**Sources**](Sources.md)
+[**list[Source]**](Source.md)
 
 ### Authorization
 
@@ -57,7 +57,7 @@ This endpoint does not need any parameter.
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Account sources sucessfully fetched  |  -  |
+**200** | List of source objects |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

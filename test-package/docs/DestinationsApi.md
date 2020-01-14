@@ -11,7 +11,7 @@ Method | HTTP request | Description
 
 
 # **api_create_destination**
-> Destination api_create_destination(destination_info=destination_info)
+> api_create_destination(destination_info=destination_info)
 
 Creates a new destination. Only a single destination is supported per Stitch client account. 
 
@@ -36,8 +36,7 @@ destination_info = openapi_client.DestinationInfo() # DestinationInfo | Object c
 
 try:
     # Creates a new destination. Only a single destination is supported per Stitch client account. 
-    api_response = api_instance.api_create_destination(destination_info=destination_info)
-    pprint(api_response)
+    api_instance.api_create_destination(destination_info=destination_info)
 except ApiException as e:
     print("Exception when calling DestinationsApi->api_create_destination: %s\n" % e)
 ```
@@ -50,7 +49,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Destination**](Destination.md)
+void (empty response body)
 
 ### Authorization
 
@@ -59,12 +58,12 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Destination successfully created |  -  |
+**200** |  |  -  |
 **400** | Only a single destination per account is allowed  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -183,7 +182,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **api_update_destination**
-> Destination api_update_destination(destination_id, destination_form_properties=destination_form_properties)
+> api_update_destination(destination_id, destination_form_properties=destination_form_properties)
 
 Updates an existing destination. Modifications to the type attribute are not supported. 
 
@@ -203,8 +202,7 @@ destination_form_properties = openapi_client.DestinationFormProperties() # Desti
 
 try:
     # Updates an existing destination. Modifications to the type attribute are not supported. 
-    api_response = api_instance.api_update_destination(destination_id, destination_form_properties=destination_form_properties)
-    pprint(api_response)
+    api_instance.api_update_destination(destination_id, destination_form_properties=destination_form_properties)
 except ApiException as e:
     print("Exception when calling DestinationsApi->api_update_destination: %s\n" % e)
 ```
@@ -218,7 +216,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Destination**](Destination.md)
+void (empty response body)
 
 ### Authorization
 
@@ -227,12 +225,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Destination successfully updated  |  -  |
+**200** |  |  -  |
 **400** | Invalid destination ID  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

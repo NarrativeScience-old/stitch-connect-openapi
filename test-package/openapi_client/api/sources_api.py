@@ -52,7 +52,7 @@ class SourcesApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Sources
+        :return: list[Source]
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -77,7 +77,7 @@ class SourcesApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: tuple(Sources, status_code(int), headers(HTTPHeaderDict))
+        :return: tuple(list[Source], status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -126,7 +126,7 @@ class SourcesApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='Sources',  # noqa: E501
+            response_type='list[Source]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
