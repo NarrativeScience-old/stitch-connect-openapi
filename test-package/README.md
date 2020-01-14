@@ -80,11 +80,16 @@ Class | Method | HTTP request | Description
 *DestinationsApi* | [**api_delete_destination**](docs/DestinationsApi.md#api_delete_destination) | **DELETE** /v4/destinations/{destination_id} | Deletes an existing destination. Note: Stitch requires a destination to replicate data. Replication will be paused until a new destination is created and has a successful connection. 
 *DestinationsApi* | [**api_get_destinations**](docs/DestinationsApi.md#api_get_destinations) | **GET** /v4/destinations | Lists the destination currently in use for a Stitch account. Only a single data warehouse is supported per Stitch client account. 
 *DestinationsApi* | [**api_update_destination**](docs/DestinationsApi.md#api_update_destination) | **PUT** /v4/destinations/{destination_id} | Updates an existing destination. Modifications to the type attribute are not supported. 
+*SourcesApi* | [**api_create_source**](docs/SourcesApi.md#api_create_source) | **POST** /v4/sources | Creates a source object, which is the first step in setting up a new data source. After the source object is created, additional configuration steps must be completed. 
+*SourcesApi* | [**api_get_last_connection_check**](docs/SourcesApi.md#api_get_last_connection_check) | **GET** /v4/sources/{source_id}/last-connection-check | Retrieves the last connection check for a source by the source’s unique identifier. 
 *SourcesApi* | [**api_get_sources**](docs/SourcesApi.md#api_get_sources) | **GET** /v4/sources | Lists the sources for an account, including active, paused, and deleted sources. 
+*SourcesApi* | [**api_start_replication**](docs/SourcesApi.md#api_start_replication) | **POST** /v4/sources/{source_id}/sync | Manually starts a replication job for a source using the source’s unique identifier. 
 
 
 ## Documentation For Models
 
+ - [AzureDestinationFormProperties](docs/AzureDestinationFormProperties.md)
+ - [ConnectionCheck](docs/ConnectionCheck.md)
  - [ConnectionDetails](docs/ConnectionDetails.md)
  - [ConnectionStep](docs/ConnectionStep.md)
  - [ConnectionStepProps](docs/ConnectionStepProps.md)
@@ -94,8 +99,14 @@ Class | Method | HTTP request | Description
  - [DestinationFormProperties](docs/DestinationFormProperties.md)
  - [DestinationInfo](docs/DestinationInfo.md)
  - [DestinationReportCard](docs/DestinationReportCard.md)
+ - [ErrorObject](docs/ErrorObject.md)
+ - [ErrorObjectError](docs/ErrorObjectError.md)
  - [HookNotification](docs/HookNotification.md)
  - [HookNotificationConfig](docs/HookNotificationConfig.md)
+ - [InlineObject](docs/InlineObject.md)
+ - [ReplicationJob](docs/ReplicationJob.md)
+ - [S3DestinationFormProperties](docs/S3DestinationFormProperties.md)
+ - [SalesforceSourceFormProperties](docs/SalesforceSourceFormProperties.md)
  - [Source](docs/Source.md)
  - [SourceFormProperties](docs/SourceFormProperties.md)
  - [SourceReportCard](docs/SourceReportCard.md)

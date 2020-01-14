@@ -37,7 +37,6 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          description: Successfully fetched destinations connected to the Stitch account
           $ref: "#/components/responses/destinations"
 
     post:
@@ -57,7 +56,6 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          description: Destination successfully created
           $ref: "#/components/responses/destination"
         "400":
           description: >
@@ -84,8 +82,6 @@ paths:
               $ref: "#/components/schemas/destination-form-properties"
       responses:
         "200":
-          description: >
-            Destination successfully updated
           $ref: "#/components/responses/destination"
         "400":
           description: >
@@ -129,9 +125,124 @@ paths:
       operationId: api.get_sources
       responses:
         "200":
-          description: >
-            Account sources sucessfully fetched
           $ref: "#/components/responses/sources"
+      security:
+      - bearerAuth: []
+    post:
+      summary: >
+        Creates a source object, which is the first step in setting up a new data
+        source. After the source object is created, additional configuration steps
+        must be completed.
+      tags:
+      - sources
+      operationId: api.create_source
+      requestBody:
+        description: Arguments defining the source object to be created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  description: >
+                    A descriptive name for the source. This will be used to
+                    dynamically generate the name corresponding to the schema name
+                    or dataset name that the data from this source will be loaded into.
+                  type: string
+                type:
+                  description: >
+                    The source type. For example: platform.marketo or platform.hubspot.
+                  type: string
+                properties:
+                  $ref: "#/components/schemas/source-form-properties"
+              required: ["display_name", "type"]
+      responses:
+        "200":
+          description: Successfully created new source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
+        "400":
+          description: Invalid source type
+        "400":
+          description: Source’s display_name is already in use
+        "400":
+          description: Prohibited arguments
+        "400":
+          description: Invalid name property
+        "400":
+          description: Non-unique name property
+        "400":
+          description: Non-unique name property
+        "400":
+          description: Insufficient access to source type
+        "400":
+          description: Invalid properties data
+        "400":
+          description: Insufficient account access to cron scheduling feature
+        "400":
+          description: >
+            Cron expressions can’t specify both a day-of-week and day-of-month
+      security:
+      - bearerAuth: []
+
+
+  /v4/sources/{source_id}/sync:
+    post:
+      summary: >
+        Manually starts a replication job for a source using the source’s
+        unique identifier.
+      tags:
+      - sources
+      operationId: api.start_replication
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: successfully started replication job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/replication-job"
+        "200":
+          description: Replication job already in progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+        "400":
+          description: Invalid source ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+        "400":
+          description: Source has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+      security:
+      - bearerAuth: []
+
+  /v4/sources/{source_id}/last-connection-check:
+    get:
+      summary: >
+        Retrieves the last connection check for a source by the source’s
+        unique identifier.
+      operationId: api.get_last_connection_check
+      tags:
+      - sources
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: Successfully retrieved last connection check
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/connection-check"
       security:
       - bearerAuth: []
 
@@ -180,6 +291,12 @@ components:
             The destination type. Must be one of: azure_sqldw, postgres,
             redshift, s3, or snowflake.
           type: string
+          enum:
+          - azure_sqldw
+          - postgres
+          - redshift
+          - s3
+          - snowflake
         updated_at:
           description: >
             The time at which the destination object was last updated.
@@ -445,10 +562,16 @@ components:
       type: object
       properties:
         type:
-          type: string
           description: >
             The destination type. Must be one of: azure_sqldw, postgres,
             redshift, s3, or snowflake.
+          type: string
+          enum:
+          - azure_sqldw
+          - postgres
+          - redshift
+          - s3
+          - snowflake
         properties:
           $ref: "#/components/schemas/destination-form-properties"
 
@@ -456,6 +579,15 @@ components:
       description: >
         Parameters for connecting to the destination, excluding any sensitive
         credentials. The parameters must adhere to the type of destination.
+      oneOf:
+        - $ref: "#/components/schemas/s3-destination-form-properties"
+        - $ref: "#/components/schemas/azure-destination-form-properties"
+
+
+    s3-destination-form-properties:
+      description: >
+        An Amazon S3 connection writes data to a Amazon S3 database and
+        corresponds to destination type: s3.
       type: object
       properties:
         csv_delimiter:
@@ -468,6 +600,33 @@ components:
 
             - csv, which will use CSV (.csv) files
             - jsonl, which will use JSON (.jsonl) files
+          type: string
+        s3_bucket:
+          description: The name of the Amazon S3 bucket Stitch will write to.
+          type: string
+
+    azure-destination-form-properties:
+      description: >
+        A Azure SQL Data Warehouse connection writes data to a Azure SQL
+        Data Warehouse database and corresponds to destination type: azure_sqldw.
+      type: object
+      properties:
+        azure_storage_account_token:
+          description: >
+            An Azure Storage Access Key. This is used to access Azure Blob Storage,
+            which Stitch uses to stage data for Polybase before loading it into an
+            Azure SQL Data Warehouse destination.
+          type: string
+        azure_storage_sas_url:
+          description: >
+            An Azure Blob service Shared Access Signature (SAS) URL, which is used
+            to grant Stitch restricted access to Azure Storage resources.
+            These resources are used to load data into an Azure SQL Data Warehouse
+            destination.
+          type: string
+        database:
+          description: >
+            The name of the logical database to connect to.
           type: string
 
     source:
@@ -529,19 +688,105 @@ components:
       description: >
         Parameters for connecting to the source, excluding any sensitive credentials.
         The parameters must adhere to the type of source.
+      oneOf:
+      - $ref: "#/components/schemas/salesforce-source-form-properties"
+
+
+    salesforce-source-form-properties:
+      description: >
+        Salesforce connections read data from the Salesforce API and correspond to
+        source type: platform.salesforce.
       type: object
       properties:
+        anchor_time:
+          description: >
+            Defines the time that frequency_in_minutes is “anchored” to, which
+            Stitch will use to create the integration’s replication schedule. In
+            Stitch, this is referred to as Anchor Scheduling.
+
+            This field must contain an ISO 8601-compliant date. Note: When Stitch
+            stores this value, it will be in UTC. You should provide this value in
+            UTC to ensure the desired anchor time is retained.
+
+            For example: You want to create a schedule that is anchored to 1:00PM EST
+            and runs every 6 hours (360 minutes). To do this, you can set anchor_time
+            to something like 2018-04-30T17:00:00Z and frequency_in_minutes to 360.
+            This means jobs would run at 23:00:00, 05:00:00, 11:00:00, and so on.
+          type: string
         api_type:
           description: >
             The Salesforce API Stitch should use to extract data.
             Possible values are REST or BULK.
           type: string
+        cron_expression:
+          description: >
+            Note: Advanced Scheduling using Cron is not yet supported for this source.
+            A value may be submitted for this property if the account is on an
+            Enterprise plan, but Stitch will not use the expression submitted.
+
+            A valid Quartz cron expression representing the replication schedule for
+            the integration. Refer to the Advanced Scheduling documentation for more
+            info.
+
+            Note: If neither a cron_expression or frequency_in_minutes property is
+            provided, Stitch will use the source’s default
+            frequency_in_minutes value (60).
+          type: string
+
+
+    replication-job:
+      description: >
+        The three-step process by which Stitch replicates data. A replication job
+        includes three distinct steps: Extraction, preparation, and loading.
+      type: object
+      properties:
+        job_name:
+          description: A unique identifier for the replication job.
+          type: string
+
+    connection-check:
+      description: >
+        A Connection Check object shows the results from a test of a connection’s
+        parameters. This is a test performed by Stitch that checks the configuration
+        of a source’s connection parameters. The nature of the test varies by
+        connection type.
+      type: object
+      properties:
+        name:
+          description: The name of the connection check job.
+          type: string
+        mode:
+          description: This value will always be `check`.
+
+
+
+    error-object:
+      description: Returned when an error has occurred in some endpoint requests
+      type: object
+      properties:
+        error:
+          description: Object summarizing the error
+          type: object
+          properties:
+            type:
+              description: The type of error that occurred
+              type: string
+            message:
+              description: Description of the error condition
+              type: string
 
   parameters:
     destination_id:
       name: destination_id
       in: path
       description: The ID of the destination to be updated or deleted
+      required: true
+      schema:
+        type: string
+    source_id:
+      name: source_id
+      in: path
+      description: The ID of the source
       required: true
       schema:
         type: string
@@ -576,6 +821,7 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/source"
+
 
   securitySchemes:
     bearerAuth:

@@ -33,47 +33,17 @@ class SourceFormProperties(object):
                             and the value is json key in definition.
     """
     openapi_types = {
-        'api_type': 'str'
     }
 
     attribute_map = {
-        'api_type': 'api_type'
     }
 
-    def __init__(self, api_type=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, local_vars_configuration=None):  # noqa: E501
         """SourceFormProperties - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
-
-        self._api_type = None
         self.discriminator = None
-
-        if api_type is not None:
-            self.api_type = api_type
-
-    @property
-    def api_type(self):
-        """Gets the api_type of this SourceFormProperties.  # noqa: E501
-
-        The Salesforce API Stitch should use to extract data. Possible values are REST or BULK.   # noqa: E501
-
-        :return: The api_type of this SourceFormProperties.  # noqa: E501
-        :rtype: str
-        """
-        return self._api_type
-
-    @api_type.setter
-    def api_type(self, api_type):
-        """Sets the api_type of this SourceFormProperties.
-
-        The Salesforce API Stitch should use to extract data. Possible values are REST or BULK.   # noqa: E501
-
-        :param api_type: The api_type of this SourceFormProperties.  # noqa: E501
-        :type: str
-        """
-
-        self._api_type = api_type
 
     def to_dict(self):
         """Returns the model properties as a dict"""
