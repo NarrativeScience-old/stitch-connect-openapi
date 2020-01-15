@@ -6,7 +6,7 @@ info:
   version: "0.1"
 
 servers:
-  - url: https://api.stitchdata.com
+  - url: https://stitchdata.com
     description: Stitch Connect
 
 
@@ -18,7 +18,7 @@ paths:
         supported destination types.
       tags:
         - Destination Types
-      operationId: api.get_destination_types
+      operationId: get_destination_types
       security:
         - bearerAuth: []
       responses:
@@ -32,7 +32,7 @@ paths:
         data warehouse is supported per Stitch client account.
       tags:
         - destinations
-      operationId: api.get_destinations
+      operationId: get_destinations
       security:
         - bearerAuth: []
       responses:
@@ -45,7 +45,7 @@ paths:
         per Stitch client account.
       tags:
         - destinations
-      operationId: api.create_destination
+      operationId: create_destination
       requestBody:
         description: Object containing type and properties of a destination
         content:
@@ -71,7 +71,7 @@ paths:
         are not supported.
       tags:
         - destinations
-      operationId: api.update_destination
+      operationId: update_destination
       parameters:
       - $ref: "#/components/parameters/destination_id"
       requestBody:
@@ -97,7 +97,7 @@ paths:
         created and has a successful connection.
       tags:
       - destinations
-      operationId: api.delete_destination
+      operationId: delete_destination
       parameters:
       - $ref: "#/components/parameters/destination_id"
       responses:
@@ -122,7 +122,7 @@ paths:
         Lists the sources for an account, including active, paused, and deleted sources.
       tags:
       - sources
-      operationId: api.get_sources
+      operationId: get_sources
       responses:
         "200":
           $ref: "#/components/responses/sources"
@@ -135,7 +135,7 @@ paths:
         must be completed.
       tags:
       - sources
-      operationId: api.create_source
+      operationId: create_source
       requestBody:
         description: Arguments defining the source object to be created
         content:
@@ -195,7 +195,7 @@ paths:
         unique identifier.
       tags:
       - sources
-      operationId: api.start_replication
+      operationId: start_replication
       parameters:
       - $ref: "#/components/parameters/source_id"
       responses:
@@ -231,7 +231,7 @@ paths:
       summary: >
         Retrieves the last connection check for a source by the source’s
         unique identifier.
-      operationId: api.get_last_connection_check
+      operationId: get_last_connection_check
       tags:
       - sources
       parameters:
@@ -450,7 +450,7 @@ components:
 
             user_provided - Indicates the property must be set by the user.
             read_only - Indicates the property is read-only and is not settable by the
-            API. Generally, this is an internal field set inside of Stitch.
+             Generally, this is an internal field set inside of Stitch.
             system_provided_by_default - Indicates the property used to be
             system_provided: true, but can now be set by the API consumer. These are
             generally properties associated with OAuth for generating refresh and
@@ -463,6 +463,7 @@ components:
             - user_provided
             - read_only
             - system_provided_by_default
+            - user_provided_immutable
         json_schema:
           description: >
             Note: Data will only be returned for this array if property_type:
