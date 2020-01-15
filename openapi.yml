@@ -17,7 +17,7 @@ paths:
         Retrieves general information about the configuration required for all
         supported destination types.
       tags:
-        - Destination Types
+        - destinations
       operationId: get_destination_types
       security:
         - bearerAuth: []
@@ -37,7 +37,7 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/destinations"
+          $ref: "#/components/schemas/destinations"
 
     post:
       summary: >
@@ -137,25 +137,11 @@ paths:
       - sources
       operationId: create_source
       requestBody:
-        description: Arguments defining the source object to be created
+        description: Request body to create a new source
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                display_name:
-                  description: >
-                    A descriptive name for the source. This will be used to
-                    dynamically generate the name corresponding to the schema name
-                    or dataset name that the data from this source will be loaded into.
-                  type: string
-                type:
-                  description: >
-                    The source type. For example: platform.marketo or platform.hubspot.
-                  type: string
-                properties:
-                  $ref: "#/components/schemas/source-form-properties"
-              required: ["display_name", "type"]
+              $ref: "#/components/schemas/create-source-body"
       responses:
         "200":
           description: Successfully created new source
@@ -187,6 +173,49 @@ paths:
       security:
       - bearerAuth: []
 
+  /v4/sources/{source_id}:
+    get:
+      summary: >
+        Retrieves a previously created data source by its unique identifier.
+        This endpoint can be used to retrieve an active, paused, or deleted source.
+      operationId: get_source
+      tags:
+        - sources
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
+
+    delete:
+      summary: Deletes an existing data source.
+      operationId: delete_source
+      tags:
+      - sources
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          $ref: "#/components/schemas/source"
+
+    put:
+      summary: Updates an existing data source.
+      operationId: update_source
+      tags:
+        - sources
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      requestBody:
+        description: Request body for updating a source
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update-source-body"
+      responses:
+        "200":
+          $ref: "#/components/schemas/source"
 
   /v4/sources/{source_id}/sync:
     post:
@@ -194,10 +223,10 @@ paths:
         Manually starts a replication job for a source using the source’s
         unique identifier.
       tags:
-      - sources
+        - sources
       operationId: start_replication
       parameters:
-      - $ref: "#/components/parameters/source_id"
+        - $ref: "#/components/parameters/source_id"
       responses:
         "200":
           description: successfully started replication job
@@ -224,7 +253,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/error-object"
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 
   /v4/sources/{source_id}/last-connection-check:
     get:
@@ -233,9 +262,9 @@ paths:
         unique identifier.
       operationId: get_last_connection_check
       tags:
-      - sources
+        - sources
       parameters:
-      - $ref: "#/components/parameters/source_id"
+        - $ref: "#/components/parameters/source_id"
       responses:
         "200":
           description: Successfully retrieved last connection check
@@ -244,7 +273,73 @@ paths:
               schema:
                 $ref: "#/components/schemas/connection-check"
       security:
-      - bearerAuth: []
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/streams:
+    get:
+      summary: Lists the available streams for a source.
+      operationId: get_streams
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          $ref: "#/components/responses/streams"
+
+  /v4/sources/{source_id}/streams/{stream_id}:
+    get:
+      summary: >
+        Retrieves the schema for a source’s stream by the source and
+        stream’s unique identifiers.
+      operationId: get_stream_schema
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+        - $ref: "#/components/parameters/stream_id"
+      responses:
+        "200":
+          $ref: "#/components/schemas/stream-schema"
+        "400":
+          description: Invalid stream ID
+        "400":
+          description: Invalid source ID
+
+  /v4/sources/{source_id}/streams/metadata:
+    put:
+      summary: >
+        Updates the metadata for streams and fields. This endpoint is used to define
+        the metadata properties returned in the Stream Schema object’s
+        non-discoverable-metadata-keys property.
+      operationId: update_stream_metadata
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      requestBody:
+        description: Array of streams to update metadata for
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/streams"
+      responses:
+        "200":
+          description: Successfully updated stream metadata
+        "400":
+          description: Missing `tap_stream_id`
+        "400":
+          description: Invalid `tap_stream_id`
+        "400":
+          description: Request body includes read-only properties
+        "400":
+          description: Request body includes unsupported fields
+        "400":
+          description: >
+            Request body is missing streams, breadcrumb, and/or metadata properties
+      security:
+        - bearerAuth: []
+
 
 
 components:
@@ -292,11 +387,11 @@ components:
             redshift, s3, or snowflake.
           type: string
           enum:
-          - azure_sqldw
-          - postgres
-          - redshift
-          - s3
-          - snowflake
+            - azure_sqldw
+            - postgres
+            - redshift
+            - s3
+            - snowflake
         updated_at:
           description: >
             The time at which the destination object was last updated.
@@ -568,11 +663,11 @@ components:
             redshift, s3, or snowflake.
           type: string
           enum:
-          - azure_sqldw
-          - postgres
-          - redshift
-          - s3
-          - snowflake
+            - azure_sqldw
+            - postgres
+            - redshift
+            - s3
+            - snowflake
         properties:
           $ref: "#/components/schemas/destination-form-properties"
 
@@ -734,7 +829,6 @@ components:
             frequency_in_minutes value (60).
           type: string
 
-
     replication-job:
       description: >
         The three-step process by which Stitch replicates data. A replication job
@@ -759,7 +853,296 @@ components:
         mode:
           description: This value will always be `check`.
 
+    stream:
+      description: An object representing a table in a data source.
+      type: object
+      properties:
+        stream_id:
+          description: The stream ID.
+          type: integer
+        selected:
+          description: >
+            Indicates if the stream is selected for replication. Possible values are:
 
+            null - Only present if a stream has never been selected. Otherwise, this
+            value will be true if selected, and false if de-selected.
+            true - The stream is selected and data will be replicated for all selected
+            fields
+            false - The stream is not selected and data for this stream will not be
+            replicated
+          type: boolean
+        stream_name:
+          description: >
+            The name of the stream. This value may not be unique. For example:
+            A database with multiple schemas can have the same stream name in
+            multiple schemas.
+          type: string
+        tap_stream_id:
+          description: >
+            The unique version of the stream name.
+
+            For database sources, this value will be the database name, schema name,
+            and table name, combined.
+          type: string
+        metadata:
+          $ref: "#/components/schemas/stream-level-metadata"
+
+    stream-schema:
+      description: >
+        A Stream Schema object contains information needed to select a stream and
+        its fields for replication.
+      type: object
+      properties:
+        schema:
+          description: The JSON schema describing the stream’s fields.
+          type: string
+        metadata:
+          description: An array of Metadata objects.
+          type: array
+          items:
+            $ref: "#/components/schemas/metadata"
+        non-discoverable-metadata-keys:
+          description: >
+            An array of strings corresponding to `metadata` keys that can be modified.
+          type: array
+          items:
+            type: string
+
+    metadata:
+      description: >
+        A Metadata object describes a stream’s schema and the current state of its
+        configuration in Stitch, including its selection status, field inclusion
+        list, Primary Keys, and Replication Method.
+      type: object
+      properties:
+        breadcrumbs:
+          description: >
+            An array of strings describing a path into the schema. For example:
+
+            A value of [] refers to the entire schema, or stream
+            A value of ["properties", "<FIELD_NAME>"] refers to the
+            properties.<FIELD_NAME> portion of the schema.
+            For example: ["properties", "id"] would refer to a field named `id`
+          type: array
+          items:
+            type: string
+        metadata:
+          description: >
+            An object containing metadata associated with the breadcrumb. The type of
+            metadata object depends on the breadcrumb:
+
+            For the entire schema (breadcrumb: []), this will be a Stream-level
+            Metadata object.
+            For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
+            this will be a Field-level Metadata object
+          oneOf:
+            - $ref: "#/components/schemas/stream-level-metadata"
+            - $ref: "#/components/schemas/field-level-metadata"
+
+
+    stream-level-metadata:
+      description: >
+        Contained in Metadata and Stream objects, the Stream-level Metadata object
+        contains information about a stream’s configuration in Stitch. This includes
+        information about its selection status, Replication Method, Replication Keys,
+        and key properties.
+      type: object
+      properties:
+        database-name:
+          description: >
+            For database sources only. The name of the database containing the stream.
+          type: string
+        forced-replication-method:
+          description: >
+            Indicates which Replication Method is required for the stream.
+            Possible values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+        is-view:
+          description: >
+            For database sources only. Indicates if the stream is a database view.
+          type: boolean
+        replication-key:
+          description: >
+            Indicates the field being used as the stream’s Replication Key.
+          type: string
+        replication-method:
+          description: >
+            The Replication Method the stream uses to replicate data.
+            Accepted values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+            Note: This method is only available for certain database sources,
+            and requires additional setup to use.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+        row-count:
+          description: >
+            For database sources only. The number of rows (records) in the stream.
+          type: integer
+        schema-name:
+          description: >
+            For database sources only. The name of the schema containing the stream.
+          type: integer
+        selected:
+          description: >
+            Indicates whether a stream should be set to replicate.
+            Accepted values are:
+
+            true - The stream is selected and data for selected fields will be
+            replicated
+            false - The stream is not selected and no data will be replicated
+          type: boolean
+        table-key-properties:
+          description: >
+            An array of strings listing the fields that make up the key properties
+            of the table. These are the table’s defined Primary Keys.
+          type: array
+          items:
+            type: string
+        valid-replication-keys:
+          description: >
+            An array of strings indicating the fields valid for use as Replication Keys
+            in Key-based Incremental Replication (replication-method: INCREMENTAL).
+
+            Note: For SaaS sources, the fields listed in this array are pre-defined
+            by Stitch and will be used as the Replication Keys for the stream.
+            They cannot be modified.
+          type: array
+          items:
+            type: string
+        view-key-properties:
+          description: >
+            For database sources only. An array of strings listing the fields that
+            make up the key properties of the view.
+          type: array
+          items:
+            type: string
+
+    field-level-metadata:
+      description: >
+        Contained in a Metadata object, the Field-level metadata object contains
+        information about a field’s inclusion in a stream’s field selection list.
+      type: object
+      properties:
+        inclusion:
+          description: >
+            Indicates when a field will be included. Possible values are:
+
+            automatic - The field is included all the time, regardless of
+            selected-by-default and selected values
+            available - The field is available for selection. The field will be
+            included if selected-by-default or selected is true.
+            unsupported - The field is unsupported and will not be included,
+            regardless of selected-by-default and selected values
+
+            If a field is unsupported, the `unsupported-description` attribute may
+            provide additonal information.
+          type: string
+          enum:
+            - automatic
+            - available
+            - unsupported
+        selected:
+          description: >
+            Indicates whether a field should be included in a stream’s field selection
+            list. This value will be present only if the stream containing the
+            field is selected (selected: true).
+
+            null - The value has not been set
+            true - The field is selected
+            false - The field is not selected
+          type: boolean
+        selected-by-default:
+          description: >
+            Indicates if a field will be selected by default. Possible values are:
+
+            null - The value has not been set
+            true - The field is selected by default and is included regardless
+            of the `selected` value
+            false - The field is not selected by default. The field will be included
+            if the `selected value` is true.
+          type: boolean
+        sql-datatype:
+          description: >
+            For database sources only. The data type of a column from a database.
+          type: string
+        fieldExclusions:
+          description: >
+            A list of arrays, each array containing an array of strings that
+            correspond to fields that are incompatible when the current field
+            is selected.
+
+            For example: If the metadata for a DeviceOS field contains a
+            fieldExclusion of ["properties":"ImpressionLostToBidPercent"], then the
+            DeviceOS and ImpressionLostToBidPercent fields cannot be selected together
+            in the stream.
+        unsupported-description:
+          description: >
+            The reason a field is unsupported (`inclusion`: unsupported).
+            Note: This is not available for all sources.
+          type: string
+
+    streams:
+      description: List of stream objects
+      type: array
+      items:
+        $ref: "#/components/schemas/stream"
+
+    create-source-body:
+      description: Request body for creating a new source
+      type: object
+      properties:
+        display_name:
+          description: >
+            A descriptive name for the source. This will be used to
+            dynamically generate the name corresponding to the schema name
+            or dataset name that the data from this source will be loaded into.
+          type: string
+        type:
+          description: >
+            The source type. For example: platform.marketo or platform.hubspot.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+      required:
+        - display_name
+        - type
+
+    update-source-body:
+      description: Parameters for updating a data source
+      type: object
+      properties:
+        display_name:
+          description: >
+            A descriptive name for the source. This will be used to
+            dynamically generate the name corresponding to the schema name
+            or dataset name that the data from this source will be loaded into.
+          type: string
+        paused_at:
+          description: >
+            The time the source was paused. This field must contain an
+            ISO 8601-compliant date.
+
+            Note: Providing any value - past, present, or future - for this
+            property will pause the source immediately if the request is
+            successful.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+      required: []
 
     error-object:
       description: Returned when an error has occurred in some endpoint requests
@@ -780,7 +1163,7 @@ components:
     destination_id:
       name: destination_id
       in: path
-      description: The ID of the destination to be updated or deleted
+      description: The ID of the destination
       required: true
       schema:
         type: string
@@ -791,11 +1174,15 @@ components:
       required: true
       schema:
         type: string
+    stream_id:
+      name: stream_id
+      in: path
+      description: The ID of the source
+      required: true
+      schema:
+        type: string
 
   responses:
-    destination:
-      $ref: "#/components/schemas/destination"
-
     destinations:
       description: List of destination objects
       content:
@@ -822,6 +1209,17 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/source"
+
+    streams:
+      description: List of stream objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/stream"
+
+
 
 
   securitySchemes:
