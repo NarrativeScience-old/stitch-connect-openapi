@@ -52,6 +52,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/create-destination-body"
+        required: true
       security:
         - bearerAuth: []
       responses:
@@ -80,6 +81,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/destination-form-properties"
+        required: true
       responses:
         "200":
           $ref: "#/components/responses/destination"
@@ -142,6 +144,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/create-source-body"
+        required: true
       responses:
         "200":
           description: Successfully created new source
@@ -213,6 +216,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/update-source-body"
+        required: true
       responses:
         "200":
           $ref: "#/components/schemas/source"
@@ -323,6 +327,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/streams-update"
+        required: true
       responses:
         "200":
           description: Successfully updated stream metadata
