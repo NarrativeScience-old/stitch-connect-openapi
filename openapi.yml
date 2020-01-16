@@ -37,7 +37,7 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          $ref: "#/components/schemas/destinations"
+          $ref: "#/components/responses/destinations"
 
     post:
       summary: >
@@ -57,7 +57,11 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          $ref: "#/components/responses/destination"
+          description: Successfully created destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/destination"
         "400":
           description: >
             Missing or prohibited arguments
@@ -84,7 +88,11 @@ paths:
         required: true
       responses:
         "200":
-          $ref: "#/components/responses/destination"
+          description: Successfully updated destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/destination"
         "400":
           description: >
             Modifications to `type` are unsupported
@@ -190,7 +198,11 @@ paths:
         - $ref: "#/components/parameters/source_id"
       responses:
         "200":
-          $ref: "#/components/schemas/source"
+          description: Successfully retrieved data source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
       security:
         - bearerAuth: []
 
@@ -203,7 +215,11 @@ paths:
       - $ref: "#/components/parameters/source_id"
       responses:
         "200":
-          $ref: "#/components/schemas/source"
+          description: Successfully deleted data source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
       security:
         - bearerAuth: []
 
@@ -223,7 +239,11 @@ paths:
         required: true
       responses:
         "200":
-          $ref: "#/components/schemas/source"
+          description: Successfully updated source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
       security:
         - bearerAuth: []
 
@@ -312,11 +332,11 @@ paths:
         - $ref: "#/components/parameters/stream_id"
       responses:
         "200":
-          $ref: "#/components/schemas/stream-schema"
-        "400":
-          description: Invalid stream ID
+          $ref: "#/components/responses/stream-schema"
         "400":
           description: Invalid source ID
+        "400":
+          description: Invalid stream ID
       security:
         - bearerAuth: []
 
@@ -804,7 +824,6 @@ components:
       oneOf:
       - $ref: "#/components/schemas/salesforce-source-form-properties"
 
-
     salesforce-source-form-properties:
       description: >
         Salesforce connections read data from the Salesforce API and correspond to
@@ -979,7 +998,7 @@ components:
         list, Primary Keys, and Replication Method.
       type: object
       properties:
-        breadcrumbs:
+        breadcrumb:
           description: >
             An array of strings describing a path into the schema. For example:
 
@@ -990,22 +1009,49 @@ components:
           type: array
           items:
             type: string
-        metadata:
-          description: >
-            An object containing metadata associated with the breadcrumb. The type of
-            metadata object depends on the breadcrumb:
-
-            For the entire schema (breadcrumb: []), this will be a Stream-level
-            Metadata object.
-            For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
-            this will be a Field-level Metadata object
-          oneOf:
-            - $ref: "#/components/schemas/stream-level-metadata"
-            - $ref: "#/components/schemas/field-level-metadata"
+        metadata-object:
+          $ref: "#/components/schemas/metadata-object"
 
       required:
         - breadcrumbs
         - metadata
+
+    metadata-object:
+      description: >
+        An object containing metadata associated with the breadcrumb. The type of
+        metadata object depends on the breadcrumb:
+
+        For the entire schema (breadcrumb: []), this will be a Stream-level
+        Metadata object.
+        For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
+        this will be a Field-level Metadata object
+      oneOf:
+        - $ref: "#/components/schemas/stream-level-metadata"
+        - $ref: "#/components/schemas/field-level-metadata"
+
+    forced-replication-method:
+      description: >
+        A stream will sometimes be forced to use a particular
+        Replication Method. This describes the replication method and the reason
+        for the requirement.
+      type: object
+      properties:
+        reason:
+          description: The reason for the forced Replication Method
+          type: string
+        replication-method:
+          description: >
+            Indicates which Replication Method is required for the stream.
+            Possible values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
 
     stream-level-metadata:
       description: >
@@ -1020,18 +1066,7 @@ components:
             For database sources only. The name of the database containing the stream.
           type: string
         forced-replication-method:
-          description: >
-            Indicates which Replication Method is required for the stream.
-            Possible values are:
-
-            FULL_TABLE - The stream is using Full Table Replication
-            INCREMENTAL - The stream is using Key-based Incremental Replication
-            LOG_BASED - The stream is using Log-based Incremental Replication.
-          type: string
-          enum:
-            - FULL_TABLE
-            - INCREMENTAL
-            - LOG_BASED
+          $ref: "#/components/schemas/forced-replication-method"
         is-view:
           description: >
             For database sources only. Indicates if the stream is a database view.
@@ -1288,6 +1323,13 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/stream"
+
+    stream-schema:
+      description: Schema for a stream object
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/stream-schema"
 
   securitySchemes:
     bearerAuth:
