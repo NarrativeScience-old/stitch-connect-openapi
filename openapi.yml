@@ -91,6 +91,8 @@ paths:
         "400":
           description: >
             Invalid destination ID
+      security:
+        - bearerAuth: []
 
     delete:
       summary: >
@@ -116,7 +118,7 @@ paths:
           description: >
             Destination ID contains illegal characters
       security:
-      - bearerAuth: []
+        - bearerAuth: []
 
   /v4/sources:
     get:
@@ -129,7 +131,7 @@ paths:
         "200":
           $ref: "#/components/responses/sources"
       security:
-      - bearerAuth: []
+        - bearerAuth: []
     post:
       summary: >
         Creates a source object, which is the first step in setting up a new data
@@ -202,6 +204,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
 
     put:
       summary: Updates an existing data source.
@@ -220,6 +224,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
 
   /v4/sources/{source_id}/sync:
     post:
@@ -290,6 +296,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/streams"
+      security:
+        - bearerAuth: []
 
   /v4/sources/{source_id}/streams/{stream_id}:
     get:
@@ -309,6 +317,8 @@ paths:
           description: Invalid stream ID
         "400":
           description: Invalid source ID
+      security:
+        - bearerAuth: []
 
   /v4/sources/{source_id}/streams/metadata:
     put:
@@ -344,7 +354,6 @@ paths:
             Request body is missing streams, breadcrumb, and/or metadata properties
       security:
         - bearerAuth: []
-
 
 
 components:
@@ -1279,9 +1288,6 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/stream"
-
-
-
 
   securitySchemes:
     bearerAuth:
