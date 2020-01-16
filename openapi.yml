@@ -828,6 +828,53 @@ components:
             provided, Stitch will use the source’s default
             frequency_in_minutes value (60).
           type: string
+        frequency_in_minutes:
+          description: >
+            Defines how often, in minutes, Stitch should attempt to replicate data
+            from Salesforce. Accepted values are:
+
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+          type: string
+          enum:
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+        is_sandbox:
+          description: If `true`, the Salesforce account being connected is a sandbox.
+          type: string
+        quota_percent_per_run:
+          description: >
+            The maximum percentage of Salesforce API quota allowed per
+            replication job.
+          type: string
+        quota_percent_total:
+          description: >
+            The maximum percentage of Salesforce API quota allowed per day.
+          type: string
+        select_fields_by_default:
+          description: >
+            If `true`, Stitch will automatically set new fields added in Salesforce
+            to replicate.
+          type: string
+        start_date:
+          description: >
+            The date from which Stitch should begin replicating data from Salesforce.
+            Data from this date forward will be replicated.
+
+            This field must contain an ISO 8601-compliant date, and the timestamp
+            must be midnight. For example: 2018-01-01T00:00:00Z
+          type: string
+      required:
+        - api_type
+        - frequency_in_minutes
+        - select_fields_by_default
+        - start_date
 
     replication-job:
       description: >
