@@ -51,7 +51,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/destination-info"
+              $ref: "#/components/schemas/create-destination-body"
       security:
         - bearerAuth: []
       responses:
@@ -322,7 +322,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/streams"
+              $ref: "#/components/schemas/streams-update"
       responses:
         "200":
           description: Successfully updated stream metadata
@@ -651,7 +651,7 @@ components:
                 should deliver hook notifications to.
               type: string
 
-    destination-info:
+    create-destination-body:
       description: >
         Object containing information about the destination type and the
         properties associated with that type
@@ -670,6 +670,9 @@ components:
             - snowflake
         properties:
           $ref: "#/components/schemas/destination-form-properties"
+      required:
+        - type
+        - properties
 
     destination-form-properties:
       description: >
@@ -986,6 +989,9 @@ components:
             - $ref: "#/components/schemas/stream-level-metadata"
             - $ref: "#/components/schemas/field-level-metadata"
 
+      required:
+        - breadcrumbs
+        - metadata
 
     stream-level-metadata:
       description: >
@@ -1142,11 +1148,14 @@ components:
             Note: This is not available for all sources.
           type: string
 
-    streams:
-      description: List of stream objects
+    streams-update:
+      description: List of stream objects with information to update
       type: array
       items:
         $ref: "#/components/schemas/stream"
+        required:
+          - tap_stream_id
+          - metadata
 
     create-source-body:
       description: Request body for creating a new source
