@@ -9,12 +9,6 @@ servers:
   - url: https://api.stitchdata.com
     description: Stitch Connect
 
-securitySchemes:
-  bearerAuth:
-    description: Access token
-    type: http
-    scheme: bearer
-
 paths:
   /v4/destination-types:
     get:
@@ -22,16 +16,420 @@ paths:
         Retrieves general information about the configuration required for all
         supported destination types.
       tags:
-        - Destination Types
-      operationId: api.get_destination_types
+        - destinations
+      operationId: get_destination_types
       security:
         - bearerAuth: []
       responses:
         "200":
           $ref: "#/components/responses/destination-report-cards"
 
+  /v4/destinations:
+    get:
+      summary: >
+        Lists the destination currently in use for a Stitch account. Only a single
+        data warehouse is supported per Stitch client account.
+      tags:
+        - destinations
+      operationId: get_destinations
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/destinations"
+
+    post:
+      summary: >
+        Creates a new destination. Only a single destination is supported
+        per Stitch client account.
+      tags:
+        - destinations
+      operationId: create_destination
+      requestBody:
+        description: Object containing type and properties of a destination
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/create-destination-body"
+        required: true
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully created destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/destination"
+        "400":
+          description: >
+            Missing or prohibited arguments
+        "400":
+          description: >
+            Only a single destination per account is allowed
+
+  /v4/destinations/{destination_id}:
+    put:
+      summary: >
+        Updates an existing destination. Modifications to the type attribute
+        are not supported.
+      tags:
+        - destinations
+      operationId: update_destination
+      parameters:
+      - $ref: "#/components/parameters/destination_id"
+      requestBody:
+        description: Object containing properties info
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/destination-form-properties"
+        required: true
+      responses:
+        "200":
+          description: Successfully updated destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/destination"
+        "400":
+          description: >
+            Modifications to `type` are unsupported
+        "400":
+          description: >
+            Invalid destination ID
+      security:
+        - bearerAuth: []
+
+    delete:
+      summary: >
+        Deletes an existing destination. Note: Stitch requires a destination to
+        replicate data. Replication will be paused until a new destination is
+        created and has a successful connection.
+      tags:
+      - destinations
+      operationId: delete_destination
+      parameters:
+      - $ref: "#/components/parameters/destination_id"
+      responses:
+        "200":
+          description: >
+            Destination successfully deleted
+        "400":
+          description: >
+            Invalid destination ID
+        "502":
+          description: >
+            Destination ID not provided
+        "502":
+          description: >
+            Destination ID contains illegal characters
+      security:
+        - bearerAuth: []
+
+  /v4/sources:
+    get:
+      summary: >
+        Lists the sources for an account, including active, paused, and deleted sources.
+      tags:
+      - sources
+      operationId: get_sources
+      responses:
+        "200":
+          $ref: "#/components/responses/sources"
+      security:
+        - bearerAuth: []
+    post:
+      summary: >
+        Creates a source object, which is the first step in setting up a new data
+        source. After the source object is created, additional configuration steps
+        must be completed.
+      tags:
+      - sources
+      operationId: create_source
+      requestBody:
+        description: Request body to create a new source
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/create-source-body"
+        required: true
+      responses:
+        "200":
+          description: Successfully created new source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
+        "400":
+          description: Invalid source type
+        "400":
+          description: Source’s display_name is already in use
+        "400":
+          description: Prohibited arguments
+        "400":
+          description: Invalid name property
+        "400":
+          description: Non-unique name property
+        "400":
+          description: Non-unique name property
+        "400":
+          description: Insufficient access to source type
+        "400":
+          description: Invalid properties data
+        "400":
+          description: Insufficient account access to cron scheduling feature
+        "400":
+          description: >
+            Cron expressions can’t specify both a day-of-week and day-of-month
+      security:
+      - bearerAuth: []
+
+  /v4/sources/{source_id}:
+    get:
+      summary: >
+        Retrieves a previously created data source by its unique identifier.
+        This endpoint can be used to retrieve an active, paused, or deleted source.
+      operationId: get_source
+      tags:
+        - sources
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: Successfully retrieved data source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
+
+    delete:
+      summary: Deletes an existing data source.
+      operationId: delete_source
+      tags:
+      - sources
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: Successfully deleted data source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
+
+    put:
+      summary: Updates an existing data source.
+      operationId: update_source
+      tags:
+        - sources
+      parameters:
+      - $ref: "#/components/parameters/source_id"
+      requestBody:
+        description: Request body for updating a source
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update-source-body"
+        required: true
+      responses:
+        "200":
+          description: Successfully updated source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/source"
+      security:
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/sync:
+    post:
+      summary: >
+        Manually starts a replication job for a source using the source’s
+        unique identifier.
+      tags:
+        - sources
+      operationId: start_replication
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: successfully started replication job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/replication-job"
+        "200":
+          description: Replication job already in progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+        "400":
+          description: Invalid source ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+        "400":
+          description: Source has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-object"
+      security:
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/last-connection-check:
+    get:
+      summary: >
+        Retrieves the last connection check for a source by the source’s
+        unique identifier.
+      operationId: get_last_connection_check
+      tags:
+        - sources
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          description: Successfully retrieved last connection check
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/connection-check"
+      security:
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/streams:
+    get:
+      summary: Lists the available streams for a source.
+      operationId: get_streams
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      responses:
+        "200":
+          $ref: "#/components/responses/streams"
+      security:
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/streams/{stream_id}:
+    get:
+      summary: >
+        Retrieves the schema for a source’s stream by the source and
+        stream’s unique identifiers.
+      operationId: get_stream_schema
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+        - $ref: "#/components/parameters/stream_id"
+      responses:
+        "200":
+          $ref: "#/components/responses/stream-schema"
+        "400":
+          description: Invalid source ID
+        "400":
+          description: Invalid stream ID
+      security:
+        - bearerAuth: []
+
+  /v4/sources/{source_id}/streams/metadata:
+    put:
+      summary: >
+        Updates the metadata for streams and fields. This endpoint is used to define
+        the metadata properties returned in the Stream Schema object’s
+        non-discoverable-metadata-keys property.
+      operationId: update_stream_metadata
+      tags:
+        - streams
+      parameters:
+        - $ref: "#/components/parameters/source_id"
+      requestBody:
+        description: Array of streams to update metadata for
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/streams-update"
+        required: true
+      responses:
+        "200":
+          description: Successfully updated stream metadata
+        "400":
+          description: Missing `tap_stream_id`
+        "400":
+          description: Invalid `tap_stream_id`
+        "400":
+          description: Request body includes read-only properties
+        "400":
+          description: Request body includes unsupported fields
+        "400":
+          description: >
+            Request body is missing streams, breadcrumb, and/or metadata properties
+      security:
+        - bearerAuth: []
+
+
 components:
   schemas:
+    destination:
+      description: >
+        An object representing a destination. Destinations are the data warehouses
+        into which Stitch writes data.
+      type: object
+      properties:
+        created_at:
+          description: >
+            The time at which the destination object was created.
+          type: string
+        deleted_at:
+          description: >
+            The time at which the destination object was deleted.
+          type: string
+        id:
+          description: A unique identifier for this destination.
+          type: string
+        name:
+          description: The name for the destination.
+          type: string
+        paused_at:
+          description: >
+            If the connection was paused by the user, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+        properties:
+          $ref: "#/components/schemas/destination-form-properties"
+        report_card:
+          $ref: "#/components/schemas/destination-report-card"
+        stitch_client_id:
+          description: >
+            The ID of the Stitch client account.
+          type: integer
+        system_paused_at:
+          description: >
+            If the connection was paused by the system, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+          type: string
+        type:
+          description: >
+            The destination type. Must be one of: azure_sqldw, postgres,
+            redshift, s3, or snowflake.
+          type: string
+          enum:
+            - azure_sqldw
+            - postgres
+            - redshift
+            - s3
+            - snowflake
+        updated_at:
+          description: >
+            The time at which the destination object was last updated.
+          type: string
+
     source-report-card:
       description: >
         A Source Report Card object contains information about a source’s connection
@@ -180,7 +578,7 @@ components:
 
             user_provided - Indicates the property must be set by the user.
             read_only - Indicates the property is read-only and is not settable by the
-            API. Generally, this is an internal field set inside of Stitch.
+             Generally, this is an internal field set inside of Stitch.
             system_provided_by_default - Indicates the property used to be
             system_provided: true, but can now be set by the API consumer. These are
             generally properties associated with OAuth for generating refresh and
@@ -193,6 +591,7 @@ components:
             - user_provided
             - read_only
             - system_provided_by_default
+            - user_provided_immutable
         json_schema:
           description: >
             Note: Data will only be returned for this array if property_type:
@@ -285,9 +684,639 @@ components:
                 should deliver hook notifications to.
               type: string
 
-  requestBodies: {}
+    create-destination-body:
+      description: >
+        Object containing information about the destination type and the
+        properties associated with that type
+      type: object
+      properties:
+        type:
+          description: >
+            The destination type. Must be one of: azure_sqldw, postgres,
+            redshift, s3, or snowflake.
+          type: string
+          enum:
+            - azure_sqldw
+            - postgres
+            - redshift
+            - s3
+            - snowflake
+        properties:
+          $ref: "#/components/schemas/destination-form-properties"
+      required:
+        - type
+        - properties
+
+    destination-form-properties:
+      description: >
+        Parameters for connecting to the destination, excluding any sensitive
+        credentials. The parameters must adhere to the type of destination.
+      oneOf:
+        - $ref: "#/components/schemas/s3-destination-form-properties"
+        - $ref: "#/components/schemas/azure-destination-form-properties"
+
+
+    s3-destination-form-properties:
+      description: >
+        An Amazon S3 connection writes data to a Amazon S3 database and
+        corresponds to destination type: s3.
+      type: object
+      properties:
+        csv_delimiter:
+          description: csv delimiter character
+          type: string
+        output_file_format:
+          description: >
+            Defines the type of file Stitch will write to the bucket.
+            Possible values are:
+
+            - csv, which will use CSV (.csv) files
+            - jsonl, which will use JSON (.jsonl) files
+          type: string
+        s3_bucket:
+          description: The name of the Amazon S3 bucket Stitch will write to.
+          type: string
+
+    azure-destination-form-properties:
+      description: >
+        A Azure SQL Data Warehouse connection writes data to a Azure SQL
+        Data Warehouse database and corresponds to destination type: azure_sqldw.
+      type: object
+      properties:
+        azure_storage_account_token:
+          description: >
+            An Azure Storage Access Key. This is used to access Azure Blob Storage,
+            which Stitch uses to stage data for Polybase before loading it into an
+            Azure SQL Data Warehouse destination.
+          type: string
+        azure_storage_sas_url:
+          description: >
+            An Azure Blob service Shared Access Signature (SAS) URL, which is used
+            to grant Stitch restricted access to Azure Storage resources.
+            These resources are used to load data into an Azure SQL Data Warehouse
+            destination.
+          type: string
+        database:
+          description: >
+            The name of the logical database to connect to.
+          type: string
+
+    source:
+      description: >
+        An object representing a data source. Sources are the databases, APIs, and
+        other data applications that Stitch replicates data from. Sources can be
+        retrieved in a list or individually by ID.
+      type: object
+      properties:
+        id:
+          description: The unique identifier for this source.
+          type: integer
+        created_at:
+          description: The time at which the source object was created.
+          type: string
+        deleted_at:
+          description: The time at which the source object was deleted.
+          type: string
+        display_name:
+          description: The display name of the source connection.
+          type: string
+        name:
+          description: >
+            The name of the source connection, dynamically generated from
+            `display_name`. The `name` corresponds to the destination schema name that
+            the data from this source will be loaded into.
+
+            Names must:
+
+            - Contain only lowercase alphanumerics and underscores
+            - Be unique within each Stitch client account
+          type: string
+        paused_at:
+          description: >
+            If the connection was paused by the user, the time the pause began.
+            Otherwise, or if the connection is active, this will be `null`.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+        report_card:
+          $ref: "#/components/schemas/source-report-card"
+        stitch_client_id:
+          description: The ID of the Stitch client account.
+          type: integer
+        system_paused_at:
+          description: >
+            If the connection was paused by the system, the time the pause began.
+            Otherwise, or if the connection is active, this will be null.
+          type:
+            string
+        type:
+          description: The source type.
+          type: string
+        updated_at:
+          description: The time at which the object was last updated.
+          type: string
+
+    source-form-properties:
+      description: >
+        Parameters for connecting to the source, excluding any sensitive credentials.
+        The parameters must adhere to the type of source.
+      oneOf:
+      - $ref: "#/components/schemas/salesforce-source-form-properties"
+
+    salesforce-source-form-properties:
+      description: >
+        Salesforce connections read data from the Salesforce API and correspond to
+        source type: platform.salesforce.
+      type: object
+      properties:
+        anchor_time:
+          description: >
+            Defines the time that frequency_in_minutes is “anchored” to, which
+            Stitch will use to create the integration’s replication schedule. In
+            Stitch, this is referred to as Anchor Scheduling.
+
+            This field must contain an ISO 8601-compliant date. Note: When Stitch
+            stores this value, it will be in UTC. You should provide this value in
+            UTC to ensure the desired anchor time is retained.
+
+            For example: You want to create a schedule that is anchored to 1:00PM EST
+            and runs every 6 hours (360 minutes). To do this, you can set anchor_time
+            to something like 2018-04-30T17:00:00Z and frequency_in_minutes to 360.
+            This means jobs would run at 23:00:00, 05:00:00, 11:00:00, and so on.
+          type: string
+        api_type:
+          description: >
+            The Salesforce API Stitch should use to extract data.
+            Possible values are REST or BULK.
+          type: string
+        cron_expression:
+          description: >
+            Note: Advanced Scheduling using Cron is not yet supported for this source.
+            A value may be submitted for this property if the account is on an
+            Enterprise plan, but Stitch will not use the expression submitted.
+
+            A valid Quartz cron expression representing the replication schedule for
+            the integration. Refer to the Advanced Scheduling documentation for more
+            info.
+
+            Note: If neither a cron_expression or frequency_in_minutes property is
+            provided, Stitch will use the source’s default
+            frequency_in_minutes value (60).
+          type: string
+        frequency_in_minutes:
+          description: >
+            Defines how often, in minutes, Stitch should attempt to replicate data
+            from Salesforce. Accepted values are:
+
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+          type: string
+          enum:
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+        is_sandbox:
+          description: If `true`, the Salesforce account being connected is a sandbox.
+          type: string
+        quota_percent_per_run:
+          description: >
+            The maximum percentage of Salesforce API quota allowed per
+            replication job.
+          type: string
+        quota_percent_total:
+          description: >
+            The maximum percentage of Salesforce API quota allowed per day.
+          type: string
+        select_fields_by_default:
+          description: >
+            If `true`, Stitch will automatically set new fields added in Salesforce
+            to replicate.
+          type: string
+        start_date:
+          description: >
+            The date from which Stitch should begin replicating data from Salesforce.
+            Data from this date forward will be replicated.
+
+            This field must contain an ISO 8601-compliant date, and the timestamp
+            must be midnight. For example: 2018-01-01T00:00:00Z
+          type: string
+      required:
+        - api_type
+        - frequency_in_minutes
+        - select_fields_by_default
+        - start_date
+
+    replication-job:
+      description: >
+        The three-step process by which Stitch replicates data. A replication job
+        includes three distinct steps: Extraction, preparation, and loading.
+      type: object
+      properties:
+        job_name:
+          description: A unique identifier for the replication job.
+          type: string
+
+    connection-check:
+      description: >
+        A Connection Check object shows the results from a test of a connection’s
+        parameters. This is a test performed by Stitch that checks the configuration
+        of a source’s connection parameters. The nature of the test varies by
+        connection type.
+      type: object
+      properties:
+        name:
+          description: The name of the connection check job.
+          type: string
+        mode:
+          description: This value will always be `check`.
+
+    stream:
+      description: An object representing a table in a data source.
+      type: object
+      properties:
+        stream_id:
+          description: The stream ID.
+          type: integer
+        selected:
+          description: >
+            Indicates if the stream is selected for replication. Possible values are:
+
+            null - Only present if a stream has never been selected. Otherwise, this
+            value will be true if selected, and false if de-selected.
+            true - The stream is selected and data will be replicated for all selected
+            fields
+            false - The stream is not selected and data for this stream will not be
+            replicated
+          type: boolean
+        stream_name:
+          description: >
+            The name of the stream. This value may not be unique. For example:
+            A database with multiple schemas can have the same stream name in
+            multiple schemas.
+          type: string
+        tap_stream_id:
+          description: >
+            The unique version of the stream name.
+
+            For database sources, this value will be the database name, schema name,
+            and table name, combined.
+          type: string
+        metadata:
+          $ref: "#/components/schemas/stream-level-metadata"
+
+    stream-schema:
+      description: >
+        A Stream Schema object contains information needed to select a stream and
+        its fields for replication.
+      type: object
+      properties:
+        schema:
+          description: The JSON schema describing the stream’s fields.
+          type: string
+        metadata:
+          description: An array of Metadata objects.
+          type: array
+          items:
+            $ref: "#/components/schemas/metadata"
+        non-discoverable-metadata-keys:
+          description: >
+            An array of strings corresponding to `metadata` keys that can be modified.
+          type: array
+          items:
+            type: string
+
+    metadata:
+      description: >
+        A Metadata object describes a stream’s schema and the current state of its
+        configuration in Stitch, including its selection status, field inclusion
+        list, Primary Keys, and Replication Method.
+      type: object
+      properties:
+        breadcrumb:
+          description: >
+            An array of strings describing a path into the schema. For example:
+
+            A value of [] refers to the entire schema, or stream
+            A value of ["properties", "<FIELD_NAME>"] refers to the
+            properties.<FIELD_NAME> portion of the schema.
+            For example: ["properties", "id"] would refer to a field named `id`
+          type: array
+          items:
+            type: string
+        metadata-object:
+          $ref: "#/components/schemas/metadata-object"
+
+      required:
+        - breadcrumbs
+        - metadata
+
+    metadata-object:
+      description: >
+        An object containing metadata associated with the breadcrumb. The type of
+        metadata object depends on the breadcrumb:
+
+        For the entire schema (breadcrumb: []), this will be a Stream-level
+        Metadata object.
+        For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
+        this will be a Field-level Metadata object
+      oneOf:
+        - $ref: "#/components/schemas/stream-level-metadata"
+        - $ref: "#/components/schemas/field-level-metadata"
+
+    forced-replication-method:
+      description: >
+        A stream will sometimes be forced to use a particular
+        Replication Method. For non-Salesforce sources, this will be a string
+        indicating which replication method is required. Otherwise, it will be
+        an object.
+      oneOf:
+        - description: >
+            Indicates which Replication Method is required for the stream.
+            Possible values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+        - $ref: "#/components/schemas/forced-replication-method-object"
+
+    forced-replication-method-object:
+      description: >
+        A stream will sometimes be forced to use a particular
+        Replication Method. This describes the replication method and the reason
+        for the requirement. This is only used for Salesforce sources.
+      type: object
+      properties:
+        reason:
+          description: The reason for the forced Replication Method
+          type: string
+        replication-method:
+          description: >
+            Indicates which Replication Method is required for the stream.
+            Possible values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+
+    stream-level-metadata:
+      description: >
+        Contained in Metadata and Stream objects, the Stream-level Metadata object
+        contains information about a stream’s configuration in Stitch. This includes
+        information about its selection status, Replication Method, Replication Keys,
+        and key properties.
+      type: object
+      properties:
+        database-name:
+          description: >
+            For database sources only. The name of the database containing the stream.
+          type: string
+        forced-replication-method:
+          $ref: "#/components/schemas/forced-replication-method"
+        is-view:
+          description: >
+            For database sources only. Indicates if the stream is a database view.
+          type: boolean
+        replication-key:
+          description: >
+            Indicates the field being used as the stream’s Replication Key.
+          type: string
+        replication-method:
+          description: >
+            The Replication Method the stream uses to replicate data.
+            Accepted values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+            Note: This method is only available for certain database sources,
+            and requires additional setup to use.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+        row-count:
+          description: >
+            For database sources only. The number of rows (records) in the stream.
+          type: integer
+        schema-name:
+          description: >
+            For database sources only. The name of the schema containing the stream.
+          type: integer
+        selected:
+          description: >
+            Indicates whether a stream should be set to replicate.
+            Accepted values are:
+
+            true - The stream is selected and data for selected fields will be
+            replicated
+            false - The stream is not selected and no data will be replicated
+          type: boolean
+        table-key-properties:
+          description: >
+            An array of strings listing the fields that make up the key properties
+            of the table. These are the table’s defined Primary Keys.
+          type: array
+          items:
+            type: string
+        valid-replication-keys:
+          description: >
+            An array of strings indicating the fields valid for use as Replication Keys
+            in Key-based Incremental Replication (replication-method: INCREMENTAL).
+
+            Note: For SaaS sources, the fields listed in this array are pre-defined
+            by Stitch and will be used as the Replication Keys for the stream.
+            They cannot be modified.
+          type: array
+          items:
+            type: string
+        view-key-properties:
+          description: >
+            For database sources only. An array of strings listing the fields that
+            make up the key properties of the view.
+          type: array
+          items:
+            type: string
+
+    field-level-metadata:
+      description: >
+        Contained in a Metadata object, the Field-level metadata object contains
+        information about a field’s inclusion in a stream’s field selection list.
+      type: object
+      properties:
+        inclusion:
+          description: >
+            Indicates when a field will be included. Possible values are:
+
+            automatic - The field is included all the time, regardless of
+            selected-by-default and selected values
+            available - The field is available for selection. The field will be
+            included if selected-by-default or selected is true.
+            unsupported - The field is unsupported and will not be included,
+            regardless of selected-by-default and selected values
+
+            If a field is unsupported, the `unsupported-description` attribute may
+            provide additonal information.
+          type: string
+          enum:
+            - automatic
+            - available
+            - unsupported
+        selected:
+          description: >
+            Indicates whether a field should be included in a stream’s field selection
+            list. This value will be present only if the stream containing the
+            field is selected (selected: true).
+
+            null - The value has not been set
+            true - The field is selected
+            false - The field is not selected
+          type: boolean
+        selected-by-default:
+          description: >
+            Indicates if a field will be selected by default. Possible values are:
+
+            null - The value has not been set
+            true - The field is selected by default and is included regardless
+            of the `selected` value
+            false - The field is not selected by default. The field will be included
+            if the `selected value` is true.
+          type: boolean
+        sql-datatype:
+          description: >
+            For database sources only. The data type of a column from a database.
+          type: string
+        fieldExclusions:
+          description: >
+            A list of arrays, each array containing an array of strings that
+            correspond to fields that are incompatible when the current field
+            is selected.
+
+            For example: If the metadata for a DeviceOS field contains a
+            fieldExclusion of ["properties":"ImpressionLostToBidPercent"], then the
+            DeviceOS and ImpressionLostToBidPercent fields cannot be selected together
+            in the stream.
+        unsupported-description:
+          description: >
+            The reason a field is unsupported (`inclusion`: unsupported).
+            Note: This is not available for all sources.
+          type: string
+
+    streams-update:
+      description: List of stream objects with information to update
+      type: array
+      items:
+        $ref: "#/components/schemas/stream"
+        required:
+          - tap_stream_id
+          - metadata
+
+    create-source-body:
+      description: Request body for creating a new source
+      type: object
+      properties:
+        display_name:
+          description: >
+            A descriptive name for the source. This will be used to
+            dynamically generate the name corresponding to the schema name
+            or dataset name that the data from this source will be loaded into.
+          type: string
+        type:
+          description: >
+            The source type. For example: platform.marketo or platform.hubspot.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+      required:
+        - display_name
+        - type
+
+    update-source-body:
+      description: Parameters for updating a data source
+      type: object
+      properties:
+        display_name:
+          description: >
+            A descriptive name for the source. This will be used to
+            dynamically generate the name corresponding to the schema name
+            or dataset name that the data from this source will be loaded into.
+          type: string
+        paused_at:
+          description: >
+            The time the source was paused. This field must contain an
+            ISO 8601-compliant date.
+
+            Note: Providing any value - past, present, or future - for this
+            property will pause the source immediately if the request is
+            successful.
+          type: string
+        properties:
+          $ref: "#/components/schemas/source-form-properties"
+      required: []
+
+    error-object:
+      description: Returned when an error has occurred in some endpoint requests
+      type: object
+      properties:
+        error:
+          description: Object summarizing the error
+          type: object
+          properties:
+            type:
+              description: The type of error that occurred
+              type: string
+            message:
+              description: Description of the error condition
+              type: string
+
+  parameters:
+    destination_id:
+      name: destination_id
+      in: path
+      description: The ID of the destination
+      required: true
+      schema:
+        type: string
+    source_id:
+      name: source_id
+      in: path
+      description: The ID of the source
+      required: true
+      schema:
+        type: string
+    stream_id:
+      name: stream_id
+      in: path
+      description: The ID of the source
+      required: true
+      schema:
+        type: string
 
   responses:
+    destinations:
+      description: List of destination objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/destination"
+
     destination-report-cards:
       description: List of destination report card objects
       content:
@@ -296,3 +1325,34 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/destination-report-card"
+
+    sources:
+      description: List of source objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/source"
+
+    streams:
+      description: List of stream objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/stream"
+
+    stream-schema:
+      description: Schema for a stream object
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/stream-schema"
+
+  securitySchemes:
+    bearerAuth:
+      description: Access token
+      type: http
+      scheme: bearer
