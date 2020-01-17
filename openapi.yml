@@ -1032,8 +1032,29 @@ components:
     forced-replication-method:
       description: >
         A stream will sometimes be forced to use a particular
+        Replication Method. For non-Salesforce sources, this will be a string
+        indicating which replication method is required. Otherwise, it will be
+        an object.
+      oneOf:
+        - description: >
+            Indicates which Replication Method is required for the stream.
+            Possible values are:
+
+            FULL_TABLE - The stream is using Full Table Replication
+            INCREMENTAL - The stream is using Key-based Incremental Replication
+            LOG_BASED - The stream is using Log-based Incremental Replication.
+          type: string
+          enum:
+            - FULL_TABLE
+            - INCREMENTAL
+            - LOG_BASED
+        - $ref: "#/components/schemas/forced-replication-method-object"
+
+    forced-replication-method-object:
+      description: >
+        A stream will sometimes be forced to use a particular
         Replication Method. This describes the replication method and the reason
-        for the requirement.
+        for the requirement. This is only used for Salesforce sources.
       type: object
       properties:
         reason:
