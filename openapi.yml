@@ -997,7 +997,7 @@ components:
         list, Primary Keys, and Replication Method.
       type: object
       properties:
-        breadcrumb:
+        breadcrumbs:
           description: >
             An array of strings describing a path into the schema. For example:
 
@@ -1011,7 +1011,7 @@ components:
         metadata-object:
           $ref: "#/components/schemas/metadata-object"
       required:
-        - breadcrumb
+        - breadcrumbs
         - metadata-object
 
     metadata-object:
