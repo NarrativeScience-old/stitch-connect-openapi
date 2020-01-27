@@ -997,7 +997,7 @@ components:
         list, Primary Keys, and Replication Method.
       type: object
       properties:
-        breadcrumb:
+        breadcrumbs:
           description: >
             An array of strings describing a path into the schema. For example:
 
@@ -1010,10 +1010,9 @@ components:
             type: string
         metadata-object:
           $ref: "#/components/schemas/metadata-object"
-
       required:
         - breadcrumbs
-        - metadata
+        - metadata-object
 
     metadata-object:
       description: >
@@ -1267,7 +1266,6 @@ components:
           type: string
         properties:
           $ref: "#/components/schemas/source-form-properties"
-      required: []
 
     error-object:
       description: Returned when an error has occurred in some endpoint requests
