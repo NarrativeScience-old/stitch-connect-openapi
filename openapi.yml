@@ -849,6 +849,14 @@ components:
             The Salesforce API Stitch should use to extract data.
             Possible values are REST or BULK.
           type: string
+        client_id:
+          description: >
+            The secure OAuth 2.0 identifier for the client application.
+          type: string
+        client_secret:
+          description: >
+            The secure OAuth 2.0 secret key for the client application.
+          type: string
         cron_expression:
           description: >
             Note: Advanced Scheduling using Cron is not yet supported for this source.
@@ -880,6 +888,9 @@ components:
             - 360
             - 720
             - 1440
+        instance_url:
+          description: The url of the instance to connect to.
+          type: string
         is_sandbox:
           description: If `true`, the Salesforce account being connected is a sandbox.
           type: string
@@ -891,6 +902,9 @@ components:
         quota_percent_total:
           description: >
             The maximum percentage of Salesforce API quota allowed per day.
+          type: string
+        refresh_token:
+          description: The OAuth 2.0 refresh token used to access the Salesforce API.
           type: string
         select_fields_by_default:
           description: >
