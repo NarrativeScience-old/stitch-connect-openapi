@@ -982,8 +982,8 @@ components:
           type: string
         metadata:
           oneOf:
-            $ref: "#/components/schemas/stream-level-metadata"
-            $ref: "#/components/schemas/metadata"
+            - $ref: "#/components/schemas/stream-level-metadata"
+            - $ref: "#/components/schemas/metadata"
 
     stream-schema:
       description: >
