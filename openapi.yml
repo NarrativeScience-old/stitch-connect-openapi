@@ -981,7 +981,9 @@ components:
             and table name, combined.
           type: string
         metadata:
-          $ref: "#/components/schemas/stream-level-metadata"
+          oneOf:
+            $ref: "#/components/schemas/stream-level-metadata"
+            $ref: "#/components/schemas/metadata"
 
     stream-schema:
       description: >
