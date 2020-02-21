@@ -172,8 +172,6 @@ paths:
         "400":
           description: Non-unique name property
         "400":
-          description: Non-unique name property
-        "400":
           description: Insufficient access to source type
         "400":
           description: Invalid properties data
@@ -882,12 +880,6 @@ components:
             - 720
             - 1440
           type: string
-          enum:
-            - 30
-            - 60
-            - 360
-            - 720
-            - 1440
         instance_url:
           description: The url of the instance to connect to.
           type: string
