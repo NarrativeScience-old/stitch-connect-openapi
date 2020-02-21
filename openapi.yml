@@ -1022,24 +1022,21 @@ components:
           type: array
           items:
             type: string
-        metadata-object:
-          $ref: "#/components/schemas/metadata-object"
+        metadata:
+          description: >
+            An object containing metadata associated with the breadcrumb. The type of
+            metadata object depends on the breadcrumb:
+
+            For the entire schema (breadcrumb: []), this will be a Stream-level
+            Metadata object.
+            For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
+            this will be a Field-level Metadata object
+          oneOf:
+            - $ref: "#/components/schemas/stream-level-metadata"
+            - $ref: "#/components/schemas/field-level-metadata"
       required:
         - breadcrumbs
-        - metadata-object
-
-    metadata-object:
-      description: >
-        An object containing metadata associated with the breadcrumb. The type of
-        metadata object depends on the breadcrumb:
-
-        For the entire schema (breadcrumb: []), this will be a Stream-level
-        Metadata object.
-        For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
-        this will be a Field-level Metadata object
-      oneOf:
-        - $ref: "#/components/schemas/stream-level-metadata"
-        - $ref: "#/components/schemas/field-level-metadata"
+        - metadata
 
     forced-replication-method:
       description: >
