@@ -973,9 +973,9 @@ components:
             and table name, combined.
           type: string
         metadata:
-          oneOf:
-            - $ref: "#/components/schemas/stream-level-metadata"
-            - $ref: "#/components/schemas/metadata"
+          type: array
+          items:
+            $ref: "#/components/schemas/stream-level-metadata"
 
     stream-schema:
       description: >
@@ -1005,7 +1005,7 @@ components:
         list, Primary Keys, and Replication Method.
       type: object
       properties:
-        breadcrumbs:
+        breadcrumb:
           description: >
             An array of strings describing a path into the schema. For example:
 
@@ -1017,20 +1017,23 @@ components:
           items:
             type: string
         metadata:
-          description: >
-            An object containing metadata associated with the breadcrumb. The type of
-            metadata object depends on the breadcrumb:
-
-            For the entire schema (breadcrumb: []), this will be a Stream-level
-            Metadata object.
-            For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
-            this will be a Field-level Metadata object
-          oneOf:
-            - $ref: "#/components/schemas/stream-level-metadata"
-            - $ref: "#/components/schemas/field-level-metadata"
+          $ref: "#/components/schemas/metadata-object"
       required:
-        - breadcrumbs
+        - breadcrumb
         - metadata
+
+    metadata-object:
+      description: >
+        An object containing metadata associated with the breadcrumb. The type of
+        metadata object depends on the breadcrumb:
+
+        For the entire schema (breadcrumb: []), this will be a Stream-level
+        Metadata object.
+        For an individual field (breadcrumb: ["properties", "<FIELD_NAME>"]),
+        this will be a Field-level Metadata object
+      oneOf:
+        - $ref: "#/components/schemas/stream-level-metadata"
+        - $ref: "#/components/schemas/field-level-metadata"
 
     forced-replication-method:
       description: >
@@ -1222,13 +1225,17 @@ components:
           type: string
 
     streams-update:
-      description: List of stream objects with information to update
-      type: array
-      items:
-        $ref: "#/components/schemas/stream"
-        required:
-          - tap_stream_id
-          - metadata
+      description: Object containing a list of stream objects with information to update
+      type: object
+      properties:
+        streams:
+          description: List of Streams to update
+          type: array
+          items:
+            $ref: "#/components/schemas/stream"
+            required:
+              - tap_stream_id
+              - metadata
 
     create-source-body:
       description: Request body for creating a new source
