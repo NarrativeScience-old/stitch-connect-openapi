@@ -973,7 +973,9 @@ components:
             and table name, combined.
           type: string
         metadata:
-          $ref: "#/components/schemas/stream-level-metadata"
+          type: array
+          items:
+            $ref: "#/components/schemas/stream-level-metadata"
 
     stream-schema:
       description: >
@@ -1003,7 +1005,7 @@ components:
         list, Primary Keys, and Replication Method.
       type: object
       properties:
-        breadcrumbs:
+        breadcrumb:
           description: >
             An array of strings describing a path into the schema. For example:
 
@@ -1014,11 +1016,11 @@ components:
           type: array
           items:
             type: string
-        metadata-object:
+        metadata:
           $ref: "#/components/schemas/metadata-object"
       required:
-        - breadcrumbs
-        - metadata-object
+        - breadcrumb
+        - metadata
 
     metadata-object:
       description: >
@@ -1223,13 +1225,17 @@ components:
           type: string
 
     streams-update:
-      description: List of stream objects with information to update
-      type: array
-      items:
-        $ref: "#/components/schemas/stream"
-        required:
-          - tap_stream_id
-          - metadata
+      description: Object containing a list of stream objects with information to update
+      type: object
+      properties:
+        streams:
+          description: List of Streams to update
+          type: array
+          items:
+            $ref: "#/components/schemas/stream"
+            required:
+              - tap_stream_id
+              - metadata
 
     create-source-body:
       description: Request body for creating a new source
