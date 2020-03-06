@@ -1251,6 +1251,13 @@ components:
           description: >
             The source type. For example: platform.marketo or platform.hubspot.
           type: string
+        name:
+          description: >
+            The destination schema name that the data from this source will be
+            loaded into. Names must:
+            - Contain only lowercase alphanumerics and underscores
+            - Be unique within each Stitch client account
+          type: string
         properties:
           $ref: "#/components/schemas/source-form-properties"
       required:
