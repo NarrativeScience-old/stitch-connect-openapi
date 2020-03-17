@@ -973,6 +973,40 @@ components:
             and table name, combined.
           type: string
         metadata:
+          $ref: "#/components/schemas/stream-level-metadata"
+
+    stream-update:
+      description: An object representing a table's updated metadata in a data source.
+      type: object
+      properties:
+        stream_id:
+          description: The stream ID.
+          type: integer
+        selected:
+          description: >
+            Indicates if the stream is selected for replication. Possible values are:
+
+            null - Only present if a stream has never been selected. Otherwise, this
+            value will be true if selected, and false if de-selected.
+            true - The stream is selected and data will be replicated for all selected
+            fields
+            false - The stream is not selected and data for this stream will not be
+            replicated
+          type: boolean
+        stream_name:
+          description: >
+            The name of the stream. This value may not be unique. For example:
+            A database with multiple schemas can have the same stream name in
+            multiple schemas.
+          type: string
+        tap_stream_id:
+          description: >
+            The unique version of the stream name.
+
+            For database sources, this value will be the database name, schema name,
+            and table name, combined.
+          type: string
+        metadata:
           type: array
           items:
             $ref: "#/components/schemas/stream-level-metadata"
@@ -1232,7 +1266,7 @@ components:
           description: List of Streams to update
           type: array
           items:
-            $ref: "#/components/schemas/stream"
+            $ref: "#/components/schemas/stream-update"
             required:
               - tap_stream_id
               - metadata
