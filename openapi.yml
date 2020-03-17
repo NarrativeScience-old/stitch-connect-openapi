@@ -353,7 +353,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/streams-update"
+              $ref: "#/components/schemas/streams-update-list"
         required: true
       responses:
         "200":
@@ -1258,7 +1258,7 @@ components:
             Note: This is not available for all sources.
           type: string
 
-    streams-update:
+    streams-update-list:
       description: Object containing a list of stream objects with information to update
       type: object
       properties:
