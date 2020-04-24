@@ -3,7 +3,7 @@ openapi: "3.0.2"
 info:
   title: Stitch Connect
   description: https://www.stitchdata.com/docs/developers/stitch-connect/api
-  version: "0.1"
+  version: "0.2"
 
 servers:
   - url: https://api.stitchdata.com
@@ -1158,7 +1158,7 @@ components:
         schema-name:
           description: >
             For database sources only. The name of the schema containing the stream.
-          type: integer
+          type: string
         selected:
           description: >
             Indicates whether a stream should be set to replicate.
