@@ -3,7 +3,7 @@ openapi: "3.0.2"
 info:
   title: Stitch Connect
   description: https://www.stitchdata.com/docs/developers/stitch-connect/api
-  version: "0.2"
+  version: "0.3"
 
 servers:
   - url: https://api.stitchdata.com
@@ -940,6 +940,72 @@ components:
           type: string
         mode:
           description: This value will always be `check`.
+          type: string
+        status:
+          description: >
+            The status of the connection check job. Possible values are:
+
+            - running
+            - succeeded
+            - failed
+          type: string
+        start_time:
+          description: The date and time the connection check job started.
+          type: string
+        completion_time:
+          description: The date and time the connection check job was completed.
+          type: string
+        error:
+          description: >
+            Indicates if the connection check job resulted in an error. This will be
+            true if any of the exit_status properties are non-zero.
+          type: boolean
+        check_exit_status:
+          description: >
+            The exit status of the connection check job. Possible values are:
+
+            null - The connection check job is still running
+            0 - The connection check job was successful
+            1 - The connection check job was unsuccessful
+          type: integer
+        discovery_exit_status:
+          description: >
+            The exit status of the discovery portion of the connection check job.
+            Possible values are:
+
+            null - Job is still running
+            0 - Job was successful
+            Any non-zero value - Discovery failed
+          type: integer
+        discovery_error_message:
+          description: >
+            Exception message raised when discovery failed during the connection
+            check job. If successful, this will be null.
+          type: string
+        tap_exit_status:
+          description: >
+            The exit status of the tap. Possible values are:
+
+            null - Tap is still running
+            0 - Tap was successful
+            Any non-zero value - Tap failed
+          type: integer
+        tap_error_message:
+          description: >
+            Exception message raised when extraction failed during the job.
+            If successful, this will be null.
+          type: string
+        target_exit_status:
+          description: >
+            The exit status of the target portion of the connection check job. Possible values are:
+
+            null - Target is still running
+            0 - Target was successful
+            Any non-zero value - Target failed
+          type: integer
+        target_error_message:
+          description: This value will always be null.
+          type: string
 
     stream:
       description: An object representing a table in a data source.
