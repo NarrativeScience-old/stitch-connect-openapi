@@ -820,6 +820,7 @@ components:
         The parameters must adhere to the type of source.
       oneOf:
       - $ref: "#/components/schemas/salesforce-source-form-properties"
+      - $ref: "#/components/schemas/google-analytics-source-form-properties"
 
     salesforce-source-form-properties:
       description: >
@@ -915,6 +916,98 @@ components:
         - api_type
         - frequency_in_minutes
         - select_fields_by_default
+        - start_date
+
+    google-analytics-source-form-properties:
+      description: >
+        Google Analytics connections read data from the Google Analytics API and
+        correspond to source type: platform.google-analytics.
+      type: object
+      properties:
+        anchor_time:
+          description: >
+            Defines the time that frequency_in_minutes is “anchored” to, which
+            Stitch will use to create the integration’s replication schedule. In
+            Stitch, this is referred to as Anchor Scheduling.
+
+            This field must contain an ISO 8601-compliant date. Note: When Stitch
+            stores this value, it will be in UTC. You should provide this value in
+            UTC to ensure the desired anchor time is retained.
+
+            For example: You want to create a schedule that is anchored to 1:00PM EST
+            and runs every 6 hours (360 minutes). To do this, you can set anchor_time
+            to something like 2018-04-30T17:00:00Z and frequency_in_minutes to 360.
+            This means jobs would run at 23:00:00, 05:00:00, 11:00:00, and so on.
+          type: string
+        client_id:
+          description: >
+            The secure OAuth 2.0 identifier for the client application.
+          type: string
+        client_secret:
+          description: >
+            The secure OAuth 2.0 secret key for the client application.
+          type: string
+        cron_expression:
+          description: >
+            Note: Advanced Scheduling using Cron is not yet supported for this source.
+            A value may be submitted for this property if the account is on an
+            Enterprise plan, but Stitch will not use the expression submitted.
+
+            A valid Quartz cron expression representing the replication schedule for
+            the integration. Refer to the Advanced Scheduling documentation for more
+            info.
+
+            Note: If neither a cron_expression or frequency_in_minutes property is
+            provided, Stitch will use the source’s default
+            frequency_in_minutes value (60).
+          type: string
+        frequency_in_minutes:
+          description: >
+            Defines how often, in minutes, Stitch should attempt to replicate data
+            from Google Analytics. Accepted values are:
+
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+          type: string
+        quota_user:
+          description: >
+            Note: This is a read-only property and will be returned when the
+            Google Analytics object is successfully created. Including it in POST
+            or PUT requests will result in InvalidProperties errors.
+          type: string
+        refresh_token:
+          description: The OAuth 2.0 refresh token used to access the Google API.
+          type: string
+        report_definitions:
+          description: >
+            An array of objects, each object pertaining to a custom report you want
+            to create. Note: Metrics and dimensions for each report can be selected
+            when the source proceeds to the field_selection step.
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                description: A unique ID for the custom report.
+                type: string
+              name:
+                description: >
+                  The name of the custom report. This will be used to create the
+                  name of the corresponding table in the destination.
+                type: string
+        start_date:
+          description: >
+            The date from which Stitch should begin replicating data from Salesforce.
+            Data from this date forward will be replicated.
+
+            This field must contain an ISO 8601-compliant date, and the timestamp
+            must be midnight. For example: 2018-01-01T00:00:00Z
+          type: string
+      required:
+        - report_definitions
         - start_date
 
     replication-job:
@@ -1259,6 +1352,14 @@ components:
           type: array
           items:
             type: string
+        tap_google_analytics.all_cubes:
+          description: >
+            For Google Analytics sources only. An array of strings listing all the
+            ‘cubes’ available in the Google Analytics source. A cube is a group of
+            metrics and dimensions that are compatible together.
+          type: array
+          items:
+            type: string
 
     field-level-metadata:
       description: >
@@ -1322,6 +1423,68 @@ components:
           description: >
             The reason a field is unsupported (`inclusion`: unsupported).
             Note: This is not available for all sources.
+          type: string
+        tap_google_analytics.cubes:
+          description: >
+            For Google Analytics sources only. An array of strings containing the
+            ‘cubes’ the field is a part of. A cube is a group of metrics and
+            dimensions that are compatible together.
+          type: array
+          items:
+            type: string
+        tap_google_analytics.group:
+          description: >
+            For Google Analytics sources only. The group the field belongs to.
+            Possible values are:
+
+            - Ad Exchange
+            - Adsense
+            - Adwords
+            - App Tracking
+            - Audience
+            - Channel Grouping
+            - Content Experiments
+            - Content Grouping
+            - Custom Variables or Columns
+            - DoubleClick Bid Manager
+            - DoubleClick Campaign Manager
+            - DoubleClick Search
+            - DoubleClick for Publishers
+            - DoubleClick for Publishers Backfill
+            - Ecommerce
+            - Event Tracking
+            - Exceptions
+            - Geo Network
+            - Goal Conversions
+            - Internal Search
+            - Lifetime Value and Cohorts
+            - Page Tracking
+            - Platform or Device
+            - Publisher
+            - Report Fields
+            - Session
+            - Site Speed
+            - Social Activities
+            - Social Interactions
+            - System
+            - Time
+            - Traffic Sources
+            - User
+            - User Timings
+          type: array
+          items:
+            type: string
+        behavior:
+          description: >
+            For Google Analytics and Google Ads sources only. The type of field. Possible values are:
+
+            - ATTRIBUTE - Goolgle Ads sources only
+            - METRIC
+            - DIMENSION - Google Analytics sources only
+            - SEGMENT - Goolgle Ads sources only
+
+            Note: This property won’t be present for Google Analytics fields where
+            tap_google_analytics.group: Report Fields.
           type: string
 
     streams-update-list:
