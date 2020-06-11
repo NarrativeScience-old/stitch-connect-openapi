@@ -912,11 +912,6 @@ components:
             This field must contain an ISO 8601-compliant date, and the timestamp
             must be midnight. For example: 2018-01-01T00:00:00Z
           type: string
-      required:
-        - api_type
-        - frequency_in_minutes
-        - select_fields_by_default
-        - start_date
 
     google-analytics-source-form-properties:
       description: >
@@ -1006,9 +1001,6 @@ components:
             This field must contain an ISO 8601-compliant date, and the timestamp
             must be midnight. For example: 2018-01-01T00:00:00Z
           type: string
-      required:
-        - report_definitions
-        - start_date
 
     replication-job:
       description: >
