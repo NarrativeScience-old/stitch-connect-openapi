@@ -1463,9 +1463,7 @@ components:
             - Traffic Sources
             - User
             - User Timings
-          type: array
-          items:
-            type: string
+          type: string
         behavior:
           description: >
             For Google Analytics and Google Ads sources only. The type of field. Possible values are:
