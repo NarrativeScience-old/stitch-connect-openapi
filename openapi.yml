@@ -164,7 +164,7 @@ paths:
         "400":
           description: Invalid source type
         "400":
-          description: Source’s display_name is already in use
+          description: Source's display_name is already in use
         "400":
           description: Prohibited arguments
         "400":
@@ -179,7 +179,7 @@ paths:
           description: Insufficient account access to cron scheduling feature
         "400":
           description: >
-            Cron expressions can’t specify both a day-of-week and day-of-month
+            Cron expressions can't specify both a day-of-week and day-of-month
       security:
       - bearerAuth: []
 
@@ -247,7 +247,7 @@ paths:
   /v4/sources/{source_id}/sync:
     post:
       summary: >
-        Manually starts a replication job for a source using the source’s
+        Manually starts a replication job for a source using the source's
         unique identifier.
       tags:
         - sources
@@ -285,7 +285,7 @@ paths:
   /v4/sources/{source_id}/last-connection-check:
     get:
       summary: >
-        Retrieves the last connection check for a source by the source’s
+        Retrieves the last connection check for a source by the source's
         unique identifier.
       operationId: get_last_connection_check
       tags:
@@ -319,8 +319,8 @@ paths:
   /v4/sources/{source_id}/streams/{stream_id}:
     get:
       summary: >
-        Retrieves the schema for a source’s stream by the source and
-        stream’s unique identifiers.
+        Retrieves the schema for a source's stream by the source and
+        stream's unique identifiers.
       operationId: get_stream_schema
       tags:
         - streams
@@ -341,7 +341,7 @@ paths:
     put:
       summary: >
         Updates the metadata for streams and fields. This endpoint is used to define
-        the metadata properties returned in the Stream Schema object’s
+        the metadata properties returned in the Stream Schema object's
         non-discoverable-metadata-keys property.
       operationId: update_stream_metadata
       tags:
@@ -430,7 +430,7 @@ components:
 
     source-report-card:
       description: >
-        A Source Report Card object contains information about a source’s connection
+        A Source Report Card object contains information about a source's connection
         configuration.
       type: object
       properties:
@@ -454,7 +454,7 @@ components:
 
     destination-report-card:
       description: >
-        A Destination Report Card object contains information about a destination’s
+        A Destination Report Card object contains information about a destination's
         connection configuration.
       type: object
       properties:
@@ -501,14 +501,14 @@ components:
     connection-details:
       description: >
         Contained in a Source or Destination Report Card object, the Details object
-        contains information about a connection type’s availability within Stitch.
+        contains information about a connection type's availability within Stitch.
       type: object
       properties:
         access:
           description: >
             Indicates whether the Stitch client who made the request has access to the connection.
 
-            This value is based on the connection’s pricing_tier and pipeline_state. If the Stitch client is using a plan that doesn’t meet the pricing_tier requirement, the access value will be false. For example: If pricing_tier: enterprise,the Stitch client must be on an Enterprise plan to access the source.
+            This value is based on the connection's pricing_tier and pipeline_state. If the Stitch client is using a plan that doesn't meet the pricing_tier requirement, the access value will be false. For example: If pricing_tier: enterprise,the Stitch client must be on an Enterprise plan to access the source.
 
             All connections with a pipeline_state value of deprecated will also have an access value of false.
           type: boolean
@@ -536,7 +536,7 @@ components:
           type: string
         pipeline_state:
           description: >
-            The connection type’s release status in Stitch. Possible values are:
+            The connection type's release status in Stitch. Possible values are:
 
             alpha - The connection is in development and is not available in Stitch.
             beta - The connection is in open or closed beta and is available in Stitch.
@@ -598,30 +598,30 @@ components:
 
             An array containing:
 
-            type - A string indicating the expected data type of the property’s value.
+            type - A string indicating the expected data type of the property's value.
             For example: boolean
-            pattern - A string indicating the expected pattern of the property’s value.
+            pattern - A string indicating the expected pattern of the property's value.
             For example: ^\\d+$
             anyOf - A series of arrays containing key-value pairs for the type and
-            format combinations Stitch will accept as the property’s value
+            format combinations Stitch will accept as the property's value
           type: array
           items:
             type: object
             properties:
               type:
                 description: >
-                  A string indicating the expected data type of the property’s value.
+                  A string indicating the expected data type of the property's value.
                   For example: boolean
                 type: string
               pattern:
                 description: >
-                  A string indicating the expected pattern of the property’s value. For
+                  A string indicating the expected pattern of the property's value. For
                   example: ^\\d+$
                 type: string
               anyOf:
                 description: >
                   A series of arrays containing key-value pairs for the type and format
-                  combinations Stitch will accept as the property’s value. F
+                  combinations Stitch will accept as the property's value. F
                 type: array
                 items:
                   type: object
@@ -640,7 +640,7 @@ components:
     hook-notification:
       description: >
         A Hook Notification object contains information about a webhook configured in
-        the account’s Post-load hook list.
+        the account's Post-load hook list.
       type: object
       properties:
         id:
@@ -821,6 +821,7 @@ components:
       oneOf:
       - $ref: "#/components/schemas/salesforce-source-form-properties"
       - $ref: "#/components/schemas/google-analytics-source-form-properties"
+      - $ref: "#/components/schemas/mixpanel-source-form-properties"
 
     salesforce-source-form-properties:
       description: >
@@ -830,8 +831,8 @@ components:
       properties:
         anchor_time:
           description: >
-            Defines the time that frequency_in_minutes is “anchored” to, which
-            Stitch will use to create the integration’s replication schedule. In
+            Defines the time that frequency_in_minutes is "anchored" to, which
+            Stitch will use to create the integration's replication schedule. In
             Stitch, this is referred to as Anchor Scheduling.
 
             This field must contain an ISO 8601-compliant date. Note: When Stitch
@@ -867,7 +868,7 @@ components:
             info.
 
             Note: If neither a cron_expression or frequency_in_minutes property is
-            provided, Stitch will use the source’s default
+            provided, Stitch will use the source's default
             frequency_in_minutes value (60).
           type: string
         frequency_in_minutes:
@@ -921,8 +922,8 @@ components:
       properties:
         anchor_time:
           description: >
-            Defines the time that frequency_in_minutes is “anchored” to, which
-            Stitch will use to create the integration’s replication schedule. In
+            Defines the time that frequency_in_minutes is "anchored" to, which
+            Stitch will use to create the integration's replication schedule. In
             Stitch, this is referred to as Anchor Scheduling.
 
             This field must contain an ISO 8601-compliant date. Note: When Stitch
@@ -953,7 +954,7 @@ components:
             info.
 
             Note: If neither a cron_expression or frequency_in_minutes property is
-            provided, Stitch will use the source’s default
+            provided, Stitch will use the source's default
             frequency_in_minutes value (60).
           type: string
         frequency_in_minutes:
@@ -1002,6 +1003,103 @@ components:
             must be midnight. For example: 2018-01-01T00:00:00Z
           type: string
 
+    mixpanel-source-form-properties:
+      description: >
+        Mixpanel connections read data from the Mixpanel API and correspond to source
+        `type: platform.mixpanel`.
+      type: object
+      properties:
+        anchor_time:
+          description: >
+            Defines the time that frequency_in_minutes is "anchored" to, which
+            Stitch will use to create the integration's replication schedule. In
+            Stitch, this is referred to as Anchor Scheduling.
+
+            This field must contain an ISO 8601-compliant date. Note: When Stitch
+            stores this value, it will be in UTC. You should provide this value in
+            UTC to ensure the desired anchor time is retained.
+
+            For example: You want to create a schedule that is anchored to 1:00PM EST
+            and runs every 6 hours (360 minutes). To do this, you can set anchor_time
+            to something like 2018-04-30T17:00:00Z and frequency_in_minutes to 360.
+            This means jobs would run at 23:00:00, 05:00:00, 11:00:00, and so on.
+          type: string
+        api_secret:
+          description: >
+            The API secret of your project in your Mixpanel account. Refer to the
+            Mixpanel documentation for instructions on obtaining this information.
+          type: string
+        attribution_window:
+          description: >
+            Defines the number, in days, Stitch should use as an attribution window. To
+            ensure your Mixpanel and Stitch settings align, we recommend using the same
+            attribution window in Stitch that you use in Mixpanel. Mixpanel's default
+            attribution window is five days (5).
+
+            Refer to the Mixpanel documentation for more information about attribution
+            windows for this integration.
+          type: string
+        cron_expression:
+          description: >
+            Note: Advanced Scheduling using Cron is not yet supported for this source.
+            A value may be submitted for this property if the account is on an
+            Enterprise plan, but Stitch will not use the expression submitted.
+
+            A valid Quartz cron expression representing the replication schedule for
+            the integration. Refer to the Advanced Scheduling documentation for more
+            info.
+
+            Note: If neither a cron_expression or frequency_in_minutes property is
+            provided, Stitch will use the source's default
+            frequency_in_minutes value (60).
+          type: string
+        date_window_size:
+          description: >
+            Defines the number, in days, for a date looping window for the export,
+            funnel, and revenue tables. Date looping will return records whose from_date
+            and to_date fall between the number of days in the defined window size.
+
+            Note: If your project has large volumes of events, you may want to set the
+            number of days to 14, 7, or even to 1 or 2 days.
+          type: string
+        frequency_in_minutes:
+          description: >
+            Defines how often, in minutes, Stitch should attempt to replicate data
+            from Google Analytics. Accepted values are:
+
+            - 30
+            - 60
+            - 360
+            - 720
+            - 1440
+          type: string
+        project_timezone:
+          description: >
+            The timezone in which your date-time fields are stored for your project. You
+            can find your project timezone in the project settings in the Mixpanel
+            console
+          type: string
+        select_properties_by_default:
+          description: >
+            A configuration parameter - the only accepted values are true and false.
+            When set to true, this parameter captures new properties in the events and
+            engage tables' records. If set to false, new properties will be ignored.
+          type: string
+        start_date:
+          description: >
+            The date from which Stitch should begin replicating data from Salesforce.
+            Data from this date forward will be replicated.
+
+            This field must contain an ISO 8601-compliant date, and the timestamp
+            must be midnight. For example: 2018-01-01T00:00:00Z
+          type: string
+      required:
+        - api_secret
+        - attribution_window
+        - date_window_size
+        - project_timezone
+        - start_date
+
     replication-job:
       description: >
         The three-step process by which Stitch replicates data. A replication job
@@ -1014,9 +1112,9 @@ components:
 
     connection-check:
       description: >
-        A Connection Check object shows the results from a test of a connection’s
+        A Connection Check object shows the results from a test of a connection's
         parameters. This is a test performed by Stitch that checks the configuration
-        of a source’s connection parameters. The nature of the test varies by
+        of a source's connection parameters. The nature of the test varies by
         connection type.
       type: object
       properties:
@@ -1169,7 +1267,7 @@ components:
       type: object
       properties:
         schema:
-          description: The JSON schema describing the stream’s fields.
+          description: The JSON schema describing the stream's fields.
           type: string
         metadata:
           description: An array of Metadata objects.
@@ -1185,7 +1283,7 @@ components:
 
     metadata:
       description: >
-        A Metadata object describes a stream’s schema and the current state of its
+        A Metadata object describes a stream's schema and the current state of its
         configuration in Stitch, including its selection status, field inclusion
         list, Primary Keys, and Replication Method.
       type: object
@@ -1268,7 +1366,7 @@ components:
     stream-level-metadata:
       description: >
         Contained in Metadata and Stream objects, the Stream-level Metadata object
-        contains information about a stream’s configuration in Stitch. This includes
+        contains information about a stream's configuration in Stitch. This includes
         information about its selection status, Replication Method, Replication Keys,
         and key properties.
       type: object
@@ -1285,7 +1383,7 @@ components:
           type: boolean
         replication-key:
           description: >
-            Indicates the field being used as the stream’s Replication Key.
+            Indicates the field being used as the stream's Replication Key.
           type: string
         replication-method:
           description: >
@@ -1322,7 +1420,7 @@ components:
         table-key-properties:
           description: >
             An array of strings listing the fields that make up the key properties
-            of the table. These are the table’s defined Primary Keys.
+            of the table. These are the table's defined Primary Keys.
           type: array
           items:
             type: string
@@ -1347,7 +1445,7 @@ components:
         tap_google_analytics.all_cubes:
           description: >
             For Google Analytics sources only. An array of strings listing all the
-            ‘cubes’ available in the Google Analytics source. A cube is a group of
+            ‘cubes' available in the Google Analytics source. A cube is a group of
             metrics and dimensions that are compatible together.
           type: array
           items:
@@ -1356,7 +1454,7 @@ components:
     field-level-metadata:
       description: >
         Contained in a Metadata object, the Field-level metadata object contains
-        information about a field’s inclusion in a stream’s field selection list.
+        information about a field's inclusion in a stream's field selection list.
       type: object
       properties:
         inclusion:
@@ -1379,7 +1477,7 @@ components:
             - unsupported
         selected:
           description: >
-            Indicates whether a field should be included in a stream’s field selection
+            Indicates whether a field should be included in a stream's field selection
             list. This value will be present only if the stream containing the
             field is selected (selected: true).
 
@@ -1419,7 +1517,7 @@ components:
         tap_google_analytics.cubes:
           description: >
             For Google Analytics sources only. An array of strings containing the
-            ‘cubes’ the field is a part of. A cube is a group of metrics and
+            ‘cubes' the field is a part of. A cube is a group of metrics and
             dimensions that are compatible together.
           type: array
           items:
@@ -1473,7 +1571,7 @@ components:
             - DIMENSION - Google Analytics sources only
             - SEGMENT - Goolgle Ads sources only
 
-            Note: This property won’t be present for Google Analytics fields where
+            Note: This property won't be present for Google Analytics fields where
             tap_google_analytics.group: Report Fields.
           type: string
 
