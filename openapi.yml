@@ -3,7 +3,7 @@ openapi: "3.0.2"
 info:
   title: Stitch Connect
   description: https://www.stitchdata.com/docs/developers/stitch-connect/api
-  version: "0.4.0"
+  version: "0.4.1"
 
 servers:
   - url: https://api.stitchdata.com
@@ -1093,12 +1093,6 @@ components:
             This field must contain an ISO 8601-compliant date, and the timestamp
             must be midnight. For example: 2018-01-01T00:00:00Z
           type: string
-      required:
-        - api_secret
-        - attribution_window
-        - date_window_size
-        - project_timezone
-        - start_date
 
     replication-job:
       description: >
