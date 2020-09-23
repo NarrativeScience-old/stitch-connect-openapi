@@ -576,20 +576,18 @@ components:
 
             user_provided - Indicates the property must be set by the user.
             read_only - Indicates the property is read-only and is not settable by the
-             Generally, this is an internal field set inside of Stitch.
+            Generally, this is an internal field set inside of Stitch.
             system_provided_by_default - Indicates the property used to be
             system_provided: true, but can now be set by the API consumer. These are
             generally properties associated with OAuth for generating refresh and
             access tokens.
+            user_provided_advanced - Indicates the property is set by the user but may
+            be configured by the Stitch support team in the event that the integration
+            is failing to work properly.
 
             Note: Use caution when setting these properties, as using incorrect values
             can put the source into a non-functioning state.
           type: string
-          enum:
-            - user_provided
-            - read_only
-            - system_provided_by_default
-            - user_provided_immutable
         json_schema:
           description: >
             Note: Data will only be returned for this array if property_type:
